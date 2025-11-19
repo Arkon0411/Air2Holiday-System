@@ -1,6 +1,7 @@
 <?php
 $host = 'localhost';
-$dbname = 'login_system';
+// Database name updated to the new Air2Holiday dump. Change back if you need the old DB.
+$dbname = 'air2holiday';
 $username = 'root';
 $password = '';
 

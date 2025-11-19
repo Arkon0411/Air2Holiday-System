@@ -3,7 +3,6 @@ require_once __DIR__ . '/../config/database.php';
 
 function getUserByUsername($username) {
     global $pdo;
-    
     try {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
         $stmt->execute([$username]);
@@ -19,32 +18,93 @@ function getUserByUsername($username) {
  */
 function registerUser($username, $email, $password) {
     global $pdo;
-    
+
     try {
-        $stmt = $pdo->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
-        return $stmt->execute([$username, $email, $password]);
+        // Generate a unique id similar to dump style
+        $id = 'u' . bin2hex(random_bytes(8));
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+        // Discover which columns exist in `users` to be tolerant of different schemas
+        $colsRes = $pdo->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
+        $available = array_map('strtolower', $colsRes ?: []);
+
+        $insertCols = [];
+        $values = [];
+
+        // id
+        if (in_array('id', $available)) {
+            $insertCols[] = 'id';
+            $values[] = $id;
+        }
+        // username (optional)
+        if (in_array('username', $available)) {
+            $insertCols[] = 'username';
+            $values[] = $username;
+        }
+        // name (use username as name if exists)
+        if (in_array('name', $available)) {
+            $insertCols[] = 'name';
+            $values[] = $username;
+        }
+        // email
+        if (in_array('email', $available)) {
+            $insertCols[] = 'email';
+            $values[] = $email;
+        }
+        // password_hash
+        if (in_array('password_hash', $available)) {
+            $insertCols[] = 'password_hash';
+            $values[] = $passwordHash;
+        } elseif (in_array('password', $available)) {
+            // fallback to legacy `password` column (not recommended)
+            $insertCols[] = 'password';
+            $values[] = $passwordHash;
+        }
+        // role
+        if (in_array('role', $available)) {
+            $insertCols[] = 'role';
+            $values[] = 'customer';
+        }
+
+        if (empty($insertCols)) {
+            throw new Exception('No valid columns found in users table to insert new user');
+        }
+
+        $placeholders = implode(', ', array_fill(0, count($insertCols), '?'));
+        $colsSql = implode(', ', $insertCols);
+
+        $sql = "INSERT INTO users ($colsSql) VALUES ($placeholders)";
+        $stmt = $pdo->prepare($sql);
+        return $stmt->execute($values);
     } catch (PDOException $e) {
-        error_log("Registration failed: " . $e->getMessage());
+        error_log("Registration failed (PDO): " . $e->getMessage());
+        // Also write a short diagnostics file to project logs for local debugging
+        $logDir = __DIR__ . '/../logs';
+        if (!is_dir($logDir)) {
+            @mkdir($logDir, 0777, true);
+        }
+        $logFile = $logDir . '/db_errors.log';
+        $message = date('c') . " REGISTER ERROR: " . $e->getMessage() . " | SQL: " . ($sql ?? '') . "\n";
+        @file_put_contents($logFile, $message, FILE_APPEND);
         return false;
     }
 }
+
 function clearResetToken($userId) {
     global $pdo;
-    
+
     try {
-        $stmt = $pdo->prepare("UPDATE users 
-                              SET reset_token = NULL, 
-                                  reset_token_expiry = NULL
-                              WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE users SET reset_token = NULL, reset_token_expiry = NULL WHERE id = ?");
         return $stmt->execute([$userId]);
     } catch (PDOException $e) {
         error_log("Failed to clear reset token: " . $e->getMessage());
         return false;
     }
 }
+
 function getUserByEmail($email) {
     global $pdo;
-    
+
     try {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->execute([$email]);
@@ -60,11 +120,9 @@ function getUserByEmail($email) {
  */
 function storeResetToken($userId, $token, $expiry) {
     global $pdo;
-    
+
     try {
-        $stmt = $pdo->prepare("UPDATE users 
-                              SET reset_token = ?, reset_token_expiry = ? 
-                              WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE id = ?");
         return $stmt->execute([$token, $expiry, $userId]);
     } catch (PDOException $e) {
         error_log("Failed to store reset token: " . $e->getMessage());
@@ -74,10 +132,15 @@ function storeResetToken($userId, $token, $expiry) {
 
 function getUserByEmailOrUsername($identifier) {
     global $pdo;
-    
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? OR username = ?");
-    $stmt->execute([$identifier, $identifier]);
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? OR username = ?");
+        $stmt->execute([$identifier, $identifier]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Failed to get user by email or username: " . $e->getMessage());
+        return false;
+    }
 }
 
 function updateFailedAttempts($userId, $attempts, $locked = false) {
@@ -94,7 +157,7 @@ function updateFailedAttempts($userId, $attempts, $locked = false) {
 function resetFailedAttempts($userId) {
     global $pdo;
     try {
-        $stmt = $pdo->prepare("UPDATE users SET failed_attempts = 0, last_failed_attempt = NULL WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE users SET failed_attempts = 0, last_failed_attempt = NULL, account_locked = 0 WHERE id = ?");
         return $stmt->execute([$userId]);
     } catch (PDOException $e) {
         error_log("Failed to reset failed attempts: " . $e->getMessage());
@@ -104,29 +167,45 @@ function resetFailedAttempts($userId) {
 
 function createPasswordResetToken($email, $token) {
     global $pdo;
-    
-    $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
-    $stmt = $pdo->prepare("UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?");
-    return $stmt->execute([$token, $expiry, $email]);
+
+    try {
+        $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
+        $stmt = $pdo->prepare("UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?");
+        return $stmt->execute([$token, $expiry, $email]);
+    } catch (PDOException $e) {
+        error_log("Failed to create password reset token: " . $e->getMessage());
+        return false;
+    }
 }
 
 function validateResetToken($token) {
     global $pdo;
-    
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE reset_token = ? AND reset_token_expiry > NOW()");
-    $stmt->execute([$token]);
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE reset_token = ? AND reset_token_expiry > NOW()");
+        $stmt->execute([$token]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Failed to validate reset token: " . $e->getMessage());
+        return false;
+    }
 }
 
 function updatePassword($userId, $newPassword) {
     global $pdo;
-    
-    $stmt = $pdo->prepare("UPDATE users SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE id = ?");
-    return $stmt->execute([$newPassword, $userId]);
+    try {
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare("UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expiry = NULL WHERE id = ?");
+        return $stmt->execute([$hash, $userId]);
+    } catch (PDOException $e) {
+        error_log("Failed to update password: " . $e->getMessage());
+        return false;
+    }
 }
+
 function getUserById($userId) {
     global $pdo;
-    
+
     try {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
         $stmt->execute([$userId]);
@@ -143,29 +222,30 @@ function isAccountLocked($user) {
     }
 
     if (isset($user['last_failed_attempt']) && isset($user['failed_attempts']) && $user['failed_attempts'] >= 3) {
-        $lastAttempt = new DateTime($user['last_failed_attempt']);
+        try {
+            $lastAttempt = new DateTime($user['last_failed_attempt']);
+        } catch (Exception $e) {
+            return true; // If date invalid, assume locked
+        }
         $now = new DateTime();
         $interval = $lastAttempt->diff($now);
-        
+
         if ($interval->i >= 30) {
             resetFailedAttempts($user['id']);
             return false;
         }
         return true;
     }
-    
+
     return false;
 }
 
 // Get all travel logs
 function getAllTravelLogs($pdo) {
     try {
-        $stmt = $pdo->query("
-            SELECT travel_logs.*, users.username 
-            FROM travel_logs 
-            JOIN users ON travel_logs.user_id = users.id 
-            ORDER BY created_at DESC
-        ");
+        $stmt = $pdo->query(
+            "SELECT travel_logs.*, users.username FROM travel_logs JOIN users ON travel_logs.user_id = users.id ORDER BY created_at DESC"
+        );
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         error_log("Error fetching travel logs: " . $e->getMessage());
@@ -176,10 +256,7 @@ function getAllTravelLogs($pdo) {
 // Create a new travel log
 function createTravelLog($pdo, $user_id, $title, $content, $image_path = null) {
     try {
-        $stmt = $pdo->prepare("
-            INSERT INTO travel_logs (user_id, title, content, image_path) 
-            VALUES (:user_id, :title, :content, :image_path)
-        ");
+        $stmt = $pdo->prepare("INSERT INTO travel_logs (user_id, title, content, image_path) VALUES (:user_id, :title, :content, :image_path)");
         $stmt->execute([
             ':user_id' => $user_id,
             ':title' => $title,
@@ -216,5 +293,3 @@ function handleFileUpload($file) {
 }
 
 ?>
-
-
