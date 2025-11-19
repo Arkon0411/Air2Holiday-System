@@ -82,16 +82,24 @@ function getUserByEmailOrUsername($identifier) {
 
 function updateFailedAttempts($userId, $attempts, $locked = false) {
     global $pdo;
-    
-    $stmt = $pdo->prepare("UPDATE users SET failed_attempts = ?, last_failed_attempt = NOW(), account_locked = ? WHERE id = ?");
-    return $stmt->execute([$attempts, $locked, $userId]);
+    try {
+        $stmt = $pdo->prepare("UPDATE users SET failed_attempts = ?, last_failed_attempt = NOW(), account_locked = ? WHERE id = ?");
+        return $stmt->execute([$attempts, $locked, $userId]);
+    } catch (PDOException $e) {
+        error_log("Failed to update failed attempts: " . $e->getMessage());
+        return false;
+    }
 }
 
 function resetFailedAttempts($userId) {
     global $pdo;
-    
-    $stmt = $pdo->prepare("UPDATE users SET failed_attempts = 0, last_failed_attempt = NULL WHERE id = ?");
-    return $stmt->execute([$userId]);
+    try {
+        $stmt = $pdo->prepare("UPDATE users SET failed_attempts = 0, last_failed_attempt = NULL WHERE id = ?");
+        return $stmt->execute([$userId]);
+    } catch (PDOException $e) {
+        error_log("Failed to reset failed attempts: " . $e->getMessage());
+        return false;
+    }
 }
 
 function createPasswordResetToken($email, $token) {
@@ -130,11 +138,11 @@ function getUserById($userId) {
 }
 
 function isAccountLocked($user) {
-    if ($user['account_locked']) {
+    if (isset($user['account_locked']) && $user['account_locked']) {
         return true;
     }
-    
-    if ($user['last_failed_attempt'] && $user['failed_attempts'] >= 3) {
+
+    if (isset($user['last_failed_attempt']) && isset($user['failed_attempts']) && $user['failed_attempts'] >= 3) {
         $lastAttempt = new DateTime($user['last_failed_attempt']);
         $now = new DateTime();
         $interval = $lastAttempt->diff($now);
