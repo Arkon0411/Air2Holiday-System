@@ -220,6 +220,17 @@ $preselected_trip = $_GET['trip_id'] ?? '';
                             </select>
                         </div>
                     </div>
+
+                    <!-- Flights list for selected country -->
+                    <div id="flightsPanel" style="margin-top:1rem; display:none;">
+                        <h3><i class="fas fa-plane"></i> Available Flights</h3>
+                        <div id="flightsContainer" style="background:#fff; padding:1rem; border-radius:8px; max-height:320px; overflow:auto; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+                            <p id="flightsLoading" style="margin:0; color:#666;">Select a country to see available flights.</p>
+                        </div>
+                    </div>
+
+                    <!-- Hidden input to hold chosen flight id (optional) -->
+                    <input type="hidden" name="flight_id" id="flight_id" value="">
                     
                     <!-- Placeholder for world map SVG -->
                     <div id="destination-map" style="height: 400px; background: #f0f0f0; margin: 1rem 0; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
@@ -1178,6 +1189,12 @@ $preselected_trip = $_GET['trip_id'] ?? '';
  <circle cx="1798.2" cy="719.3" id="2">
  </circle>
 </svg>
+                </div>
+
+                <!-- Tooltip for map hover -->
+                <div id="mapTooltip" style="display:none; position:absolute; pointer-events:none; z-index:1400;
+                    background:#fff; border:1px solid #ddd; padding:0.5rem; border-radius:6px; box-shadow:0 6px 18px rgba(0,0,0,0.12); font-size:0.95rem;">
+                </div>
                     </div>
                 </div>
                 
@@ -1291,6 +1308,115 @@ $preselected_trip = $_GET['trip_id'] ?? '';
                     <i class="fas fa-calendar-check"></i> Plan This Trip
                 </button>
             </form>
+                <script>
+                    (function () {
+                        const countrySelect = document.getElementById('country');
+                        const flightsPanel = document.getElementById('flightsPanel');
+                        const flightsContainer = document.getElementById('flightsContainer');
+                        const flightsLoading = document.getElementById('flightsLoading');
+                        const flightIdInput = document.getElementById('flight_id');
+
+                        function formatDateTime(dtStr) {
+                            if (!dtStr) return '-';
+                            const d = new Date(dtStr);
+                            if (isNaN(d)) return dtStr;
+                            return d.toLocaleString();
+                        }
+
+                        async function loadFlightsForCountry(country) {
+                            flightsPanel.style.display = 'block';
+                            flightsContainer.innerHTML = '<p style="margin:0;color:#666;">Loading flights…</p>';
+                            try {
+                                const res = await fetch('api/get_flights.php?country=' + encodeURIComponent(country));
+                                const json = await res.json();
+                                if (!json.success) {
+                                    flightsContainer.innerHTML = '<p style="margin:0;color:#c33;">Error loading flights.</p>';
+                                    return;
+                                }
+                                const data = json.data || [];
+                                if (data.length === 0) {
+                                    flightsContainer.innerHTML = '<p style="margin:0;color:#666;">No flights found for ' + country + '.</p>';
+                                    return;
+                                }
+
+                                const list = document.createElement('div');
+                                list.style.display = 'grid';
+                                list.style.gap = '.5rem';
+
+                                data.forEach(f => {
+                                    const card = document.createElement('div');
+                                    card.style.display = 'flex';
+                                    card.style.justifyContent = 'space-between';
+                                    card.style.alignItems = 'center';
+                                    card.style.padding = '.5rem';
+                                    card.style.border = '1px solid #efefef';
+                                    card.style.borderRadius = '6px';
+
+                                    const left = document.createElement('div');
+                                    left.style.display = 'flex';
+                                    left.style.gap = '.75rem';
+                                    left.style.alignItems = 'center';
+
+                                    const meta = document.createElement('div');
+                                    meta.innerHTML = '<strong>' + (f.airline || 'Airline') + ' ' + (f.flight_number || '') + '</strong>' +
+                                                     '<div style="font-size:.85rem;color:#666;">From: ' + (f.from_airport || '-') + ' → ' + (f.to_city || f.to_country || '-') + '</div>';
+
+                                    left.appendChild(meta);
+
+                                    const right = document.createElement('div');
+                                    right.style.textAlign = 'right';
+                                    right.style.minWidth = '210px';
+                                    right.innerHTML = '<div style="font-weight:600">' + (f.price ? ('$' + parseFloat(f.price).toFixed(2)) : '-') + '</div>' +
+                                                      '<div style="font-size:.85rem;color:#666;">' + formatDateTime(f.departure_datetime) + ' → ' + formatDateTime(f.arrival_datetime) + '</div>' +
+                                                      '<div style="font-size:.85rem;color:#666;">Seats: ' + (f.available_seats ?? '-') + '</div>';
+
+                                    const choose = document.createElement('button');
+                                    choose.type = 'button';
+                                    choose.className = 'btn btn-primary';
+                                    choose.style.marginLeft = '1rem';
+                                    choose.textContent = 'Choose';
+                                    choose.onclick = function () {
+                                        flightIdInput.value = f.id;
+                                        // visually indicate selection
+                                        document.querySelectorAll('#flightsContainer .selected').forEach(el => el.classList.remove('selected'));
+                                        card.classList.add('selected');
+                                    };
+
+                                    card.appendChild(left);
+                                    card.appendChild(right);
+                                    card.appendChild(choose);
+
+                                    list.appendChild(card);
+                                });
+
+                                flightsContainer.innerHTML = '';
+                                flightsContainer.appendChild(list);
+                            } catch (err) {
+                                console.error(err);
+                                flightsContainer.innerHTML = '<p style="margin:0;color:#c33;">Failed to load flights.</p>';
+                            }
+                        }
+
+                        // Expose loader so other scripts (map click handler) can call it
+                        window.loadFlightsForCountry = loadFlightsForCountry;
+
+                        if (countrySelect) {
+                            countrySelect.addEventListener('change', function (e) {
+                                const country = e.target.value;
+                                if (!country) {
+                                    flightsPanel.style.display = 'none';
+                                    return;
+                                }
+                                loadFlightsForCountry(country);
+                            });
+
+                            // If there's an initial selected country (from server), load flights
+                            if (countrySelect.value) {
+                                loadFlightsForCountry(countrySelect.value);
+                            }
+                        }
+                    })();
+                </script>
                 </div>
             </main>
         </div>
@@ -1305,7 +1431,8 @@ $preselected_trip = $_GET['trip_id'] ?? '';
     function disableDropdown(dropdown) {
         dropdown.addEventListener('change', function () {
             if (dropdown.value) {
-                dropdown.disabled = true; // Disable the dropdown
+                // Keep a visual indicator for a locked/confirmed selection
+                // but do NOT disable the control so users can change their choice.
                 dropdown.classList.add('locked-field'); // Optional: Add a visual indicator
             }
         });
@@ -1317,21 +1444,51 @@ $preselected_trip = $_GET['trip_id'] ?? '';
     if (tripDropdown) disableDropdown(tripDropdown);
 
                 document.getElementById('destination-map').addEventListener('click', function (event) {
-    const clickedCountry = event.target.dataset.country; // Get the country from the clicked element
+    // Find the nearest <path> element (so clicks on child nodes still work)
+    const path = event.target.closest && event.target.closest('path');
+    if (!path) return;
 
-    if (clickedCountry) {
-        const countrySelect = document.getElementById('country'); // Ensure this ID matches your dropdown
-        if (countrySelect) {
-            // Set the country in the dropdown
-            countrySelect.value = clickedCountry;
+    const clickedCountry = path.dataset?.country || path.getAttribute('name') || path.id || '';
+    if (!clickedCountry) return;
 
-            // Trigger the change event to filter cities and trips
+    const countrySelect = document.getElementById('country');
+
+    // Try to find an exact option match (case-insensitive)
+    let matched = false;
+    if (countrySelect) {
+        const opts = Array.from(countrySelect.options || []);
+        const match = opts.find(o => o.value && o.value.toLowerCase() === clickedCountry.toLowerCase());
+        if (match) {
+            countrySelect.value = match.value;
             countrySelect.dispatchEvent(new Event('change'));
-        } else {
-            console.error('Country dropdown not found.');
+            matched = true;
         }
-    } else {
-        console.error('Clicked element does not have a data-country attribute.');
+    }
+
+    // If no option matched, call the loader directly (loader exposed to window)
+    if (!matched) {
+        if (window.loadFlightsForCountry && typeof window.loadFlightsForCountry === 'function') {
+            window.loadFlightsForCountry(clickedCountry);
+        } else if (countrySelect) {
+            // As a fallback, set dropdown value to clickedCountry and trigger change
+            countrySelect.value = clickedCountry;
+            countrySelect.dispatchEvent(new Event('change'));
+        }
+    }
+
+    // Highlight the selected map path
+    try {
+        document.querySelectorAll('#world-map path.map-selected').forEach(p => p.classList.remove('map-selected'));
+        path.classList.add('map-selected');
+    } catch (e) {
+        // ignore
+    }
+
+    // Ensure flights panel is visible and scroll into view
+    const flightsPanel = document.getElementById('flightsPanel');
+    if (flightsPanel) {
+        flightsPanel.style.display = 'block';
+        flightsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 });
     // Get all DOM elements
@@ -1496,6 +1653,334 @@ $preselected_trip = $_GET['trip_id'] ?? '';
         // No need to modify disabled state since we're not disabling fields
         return true;
     });
+
+    // --- Map hover tooltip: show country name and some places ---
+    (function setupMapTooltip() {
+        const map = document.getElementById('world-map');
+        const tooltip = document.getElementById('mapTooltip');
+
+        if (!map || !tooltip) return;
+
+        function showForTarget(target, pageX, pageY) {
+            const country = target.dataset?.country || target.getAttribute('name') || target.id || '';
+            if (!country) {
+                tooltip.style.display = 'none';
+                return;
+            }
+
+            // Build content: country + up to 5 cities from trips data
+            let html = '<strong style="display:block;margin-bottom:6px;">' + country + '</strong>';
+            const citiesSet = countryCityMap[country];
+            const tripIdsForCountry = [];
+
+            if (citiesSet && citiesSet.size) {
+                const cities = Array.from(citiesSet).slice(0,5);
+                html += '<div style="font-size:0.9rem;color:#444;margin-bottom:4px;">Places:</div>';
+                html += '<ul style="margin:0;padding-left:1rem;color:#333;">' + cities.map(c => '<li>' + c + '</li>').join('') + '</ul>';
+            } else {
+                // Try find trips that match this country
+                for (const id in tripsData) {
+                    if (tripsData[id].country === country) tripIdsForCountry.push(id);
+                }
+                if (tripIdsForCountry.length) {
+                    html += '<div style="font-size:0.9rem;color:#444;margin-bottom:4px;">Trips:</div>';
+                    html += '<ul style="margin:0;padding-left:1rem;color:#333;">' + tripIdsForCountry.slice(0,5).map(id => '<li>' + tripsData[id].title + '</li>').join('') + '</ul>';
+                } else {
+                    html += '<div style="font-size:0.9rem;color:#666;">No places available</div>';
+                }
+            }
+
+            tooltip.innerHTML = html;
+            // position tooltip near cursor but keep inside viewport
+            const offset = 12;
+            let left = pageX + offset;
+            let top = pageY + offset;
+            const rect = tooltip.getBoundingClientRect();
+            // adjust if overflowing right/bottom
+            if (left + rect.width > window.pageXOffset + window.innerWidth) {
+                left = pageX - rect.width - offset;
+            }
+            if (top + rect.height > window.pageYOffset + window.innerHeight) {
+                top = pageY - rect.height - offset;
+            }
+
+            tooltip.style.left = (left) + 'px';
+            tooltip.style.top = (top) + 'px';
+            tooltip.style.display = 'block';
+        }
+
+        map.addEventListener('mousemove', function (e) {
+            const t = e.target;
+            if (t && t.tagName && t.tagName.toLowerCase() === 'path') {
+                showForTarget(t, e.pageX, e.pageY);
+            } else {
+                tooltip.style.display = 'none';
+            }
+        });
+
+        map.addEventListener('mouseleave', function () {
+            tooltip.style.display = 'none';
+        });
+    })();
+
+    // Map click handler: normalize country names and try fuzzy matching to select country and load flights
+    (function setupMapClickHandler() {
+        const map = document.getElementById('world-map');
+        const countrySelect = document.getElementById('country');
+        const flightsPanel = document.getElementById('flightsPanel');
+        if (!map || !countrySelect) return;
+
+        function normalizeName(s) {
+            if (!s) return '';
+            s = s.toString().toLowerCase().trim();
+            s = s.replace(/[^a-z0-9\s]/g, '');
+            s = s.replace(/^the\s+/, '');
+            s = s.replace(/republic of\s+/, '');
+            s = s.replace(/^federation of\s+/, '');
+            s = s.replace(/\sislands?$/,'');
+            s = s.replace(/\s+/, ' ');
+            // common name normalizations
+            if (s.includes('russian')) s = 'russia';
+            if (s.includes('philippine') || s.includes('philippines')) s = 'philippines';
+            return s;
+        }
+
+        function findOptionForCountry(clickedCountry) {
+            const normClicked = normalizeName(clickedCountry);
+            // first try exact matches
+            for (const opt of Array.from(countrySelect.options)) {
+                if (!opt.value) continue;
+                const optText = opt.textContent || opt.innerText || opt.value;
+                if (normalizeName(optText) === normClicked) return opt;
+            }
+
+            // then try includes / startsWith / contains heuristics
+            for (const opt of Array.from(countrySelect.options)) {
+                if (!opt.value) continue;
+                const optText = normalizeName(opt.textContent || opt.innerText || opt.value);
+                if (!optText) continue;
+                if (optText.includes(normClicked) || normClicked.includes(optText)) return opt;
+            }
+
+            // last resort: fuzzy by words (any word match)
+            const ckWords = new Set((normClicked || '').split(/\s+/).filter(Boolean));
+            let best = null; let bestScore = 0;
+            for (const opt of Array.from(countrySelect.options)) {
+                if (!opt.value) continue;
+                const optText = normalizeName(opt.textContent || opt.innerText || opt.value);
+                const words = (optText || '').split(/\s+/).filter(Boolean);
+                let score = 0;
+                for (const w of words) if (ckWords.has(w)) score++;
+                if (score > bestScore) { bestScore = score; best = opt; }
+            }
+            if (bestScore > 0) return best;
+            return null;
+        }
+
+        map.addEventListener('click', function (e) {
+            const path = e.target && (e.target.tagName && e.target.tagName.toLowerCase() === 'path') ? e.target : e.target.closest && e.target.closest('path');
+            if (!path) return;
+
+            const clickedCountry = path.dataset?.country || path.getAttribute('name') || path.id || '';
+            if (!clickedCountry) return;
+
+            const opt = findOptionForCountry(clickedCountry);
+            if (opt) {
+                countrySelect.value = opt.value;
+                countrySelect.dispatchEvent(new Event('change'));
+                // also call loader if available
+                if (window.loadFlightsForCountry) window.loadFlightsForCountry(opt.value);
+            } else {
+                // fallback: try to load directly by clickedCountry name
+                if (window.loadFlightsForCountry) window.loadFlightsForCountry(clickedCountry);
+            }
+
+            // visual highlight
+            Array.from(map.querySelectorAll('path.map-selected')).forEach(p => p.classList.remove('map-selected'));
+            path.classList.add('map-selected');
+            if (flightsPanel) flightsPanel.style.display = 'block';
+            // scroll flights into view
+            flightsPanel && flightsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    })();
+
+    // --- SVG pan & zoom (mouse wheel, mouse drag, touch pan/pinch)
+    // Improved: create horizontal repeats and avoid jitter by using screen-delta mapping for pan
+    (function setupSvgPanZoom() {
+        const svg = document.getElementById('world-map');
+        if (!svg) return;
+
+        svg.style.touchAction = 'none';
+
+        // Parse current viewBox or use defaults
+        let vb = (svg.getAttribute('viewBox') || '0 0 2000 857').split(/\s+/).map(Number);
+        let [vbX, vbY, vbW, vbH] = vb;
+        const origW = vbW;
+        const origH = vbH;
+        // Limit zoom to a narrow range so the map appears to 'rotate' rather than deeply zoom
+        const minZoomFactor = 0.1; // 10% of original width
+        const maxZoomFactor = 1.0; // 100% of original width
+        const minW = origW * minZoomFactor;
+        const maxW = origW * maxZoomFactor;
+
+        // Create horizontal repeats by grouping map paths and cloning left/right
+        function createRepeatingMap() {
+            try {
+                const NS = 'http://www.w3.org/2000/svg';
+                // collect existing children that form the map (keep groups/paths)
+                const directChildren = Array.from(svg.children).filter(n => n.tagName && (n.tagName.toLowerCase() === 'path' || n.tagName.toLowerCase() === 'g'));
+                if (!directChildren.length) return;
+
+                // Create core group and move children into it
+                const core = document.createElementNS(NS, 'g');
+                core.setAttribute('id', 'map-core');
+                directChildren.forEach(ch => core.appendChild(ch));
+                svg.appendChild(core);
+
+                // Helper to remove ids in clones to avoid duplicates
+                function removeIds(el) {
+                    if (el.getAttribute && el.getAttribute('id')) el.removeAttribute('id');
+                    for (let i = 0; i < el.children.length; i++) removeIds(el.children[i]);
+                }
+
+                // Create left and right clones
+                const left = core.cloneNode(true);
+                const right = core.cloneNode(true);
+                removeIds(left); removeIds(right);
+                left.setAttribute('transform', `translate(${-origW},0)`);
+                right.setAttribute('transform', `translate(${origW},0)`);
+                svg.appendChild(left);
+                svg.appendChild(right);
+            } catch (err) {
+                console.warn('createRepeatingMap failed', err);
+            }
+        }
+
+        createRepeatingMap();
+
+        let isPanning = false;
+        let startScreen = null; // screen coords {x,y}
+        let startViewBox = null;
+        let pinch = false;
+        let startPinchDist = 0;
+        let startPinchViewBox = null;
+
+        function wrapViewBoxX() {
+            // keep vbX within [0, origW) for numerical stability; repeating groups make it seamless
+            if (!isFinite(origW) || origW === 0) return;
+            while (vbX < 0) vbX += origW;
+            while (vbX >= origW) vbX -= origW;
+        }
+
+        function setViewBox() {
+            // Clamp width to the narrow rotation-like zoom range
+            vbW = Math.max(minW, Math.min(maxW, vbW));
+            // Ensure vbH stays proportional if needed
+            // (zoom handlers already set vbH, but keep consistent ratio here)
+            // Clamp vertical panning so the map cannot be dragged beyond its vertical edges
+            const minY = Math.min(0, origH - vbH);
+            const maxY = Math.max(0, origH - vbH);
+            vbY = Math.max(minY, Math.min(maxY, vbY));
+            wrapViewBoxX();
+            svg.setAttribute('viewBox', [vbX, vbY, vbW, vbH].join(' '));
+        }
+
+        // Wheel zoom centered on cursor (keeps existing implementation)
+        svg.addEventListener('wheel', function (e) {
+            e.preventDefault();
+            // compute svg point under cursor
+            const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+            const mouse = pt.matrixTransform(svg.getScreenCTM().inverse());
+            const zoomFactor = Math.pow(1.12, e.deltaY / 100); // >1 zoom out, <1 zoom in
+            const newW = Math.max(minW, Math.min(maxW, vbW * zoomFactor));
+            const scale = newW / vbW;
+            const newH = vbH * scale;
+
+            const nx = mouse.x - (mouse.x - vbX) * scale;
+            const ny = mouse.y - (mouse.y - vbY) * scale;
+
+            vbX = nx; vbY = ny; vbW = newW; vbH = newH;
+            setViewBox();
+        }, { passive: false });
+
+        // Mouse drag panning - use screen-delta to avoid jitter from repeated matrix transforms
+        svg.addEventListener('mousedown', function (e) {
+            isPanning = true;
+            svg.classList.add('dragging');
+            startScreen = { x: e.clientX, y: e.clientY };
+            startViewBox = [vbX, vbY, vbW, vbH];
+        });
+
+        window.addEventListener('mousemove', function (e) {
+            if (!isPanning) return;
+            const dxScreen = e.clientX - startScreen.x;
+            const dyScreen = e.clientY - startScreen.y;
+            // map screen delta to viewBox delta
+            const dx = dxScreen * (vbW / Math.max(1, svg.clientWidth));
+            const dy = dyScreen * (vbH / Math.max(1, svg.clientHeight));
+            vbX = startViewBox[0] - dx;
+            vbY = startViewBox[1] - dy;
+            setViewBox();
+        });
+
+        window.addEventListener('mouseup', function () {
+            if (!isPanning) return;
+            isPanning = false;
+            svg.classList.remove('dragging');
+        });
+
+        // Touch: single-finger pan, two-finger pinch-to-zoom
+        svg.addEventListener('touchstart', function (e) {
+            if (e.touches.length === 1) {
+                isPanning = true;
+                startScreen = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                startViewBox = [vbX, vbY, vbW, vbH];
+            } else if (e.touches.length === 2) {
+                pinch = true;
+                const p1 = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                const p2 = { x: e.touches[1].clientX, y: e.touches[1].clientY };
+                startPinchDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+                startPinchViewBox = [vbX, vbY, vbW, vbH];
+            }
+        }, { passive: false });
+
+        svg.addEventListener('touchmove', function (e) {
+            e.preventDefault();
+            if (pinch && e.touches.length === 2) {
+                const p1 = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                const p2 = { x: e.touches[1].clientX, y: e.touches[1].clientY };
+                const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+                if (!startPinchDist || startPinchDist === 0) return;
+                const factor = startPinchDist / dist;
+                const centerScreen = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+                const pt = svg.createSVGPoint(); pt.x = centerScreen.x; pt.y = centerScreen.y;
+                const center = pt.matrixTransform(svg.getScreenCTM().inverse());
+
+                let [sx, sy, sw, sh] = startPinchViewBox;
+                let newW = Math.max(minW, Math.min(maxW, sw * factor));
+                let newH = sh * (newW / sw);
+                const nx = center.x - (center.x - sx) * (newW / sw);
+                const ny = center.y - (center.y - sy) * (newH / sh);
+                vbX = nx; vbY = ny; vbW = newW; vbH = newH;
+                setViewBox();
+            } else if (isPanning && e.touches.length === 1) {
+                const dxScreen = e.touches[0].clientX - startScreen.x;
+                const dyScreen = e.touches[0].clientY - startScreen.y;
+                const dx = dxScreen * (vbW / Math.max(1, svg.clientWidth));
+                const dy = dyScreen * (vbH / Math.max(1, svg.clientHeight));
+                vbX = startViewBox[0] - dx;
+                vbY = startViewBox[1] - dy;
+                setViewBox();
+            }
+        }, { passive: false });
+
+        svg.addEventListener('touchend', function (e) {
+            if (e.touches.length === 0) {
+                isPanning = false; pinch = false; svg.classList.remove('dragging');
+            }
+        });
+
+    })();
 });
 
         </script>

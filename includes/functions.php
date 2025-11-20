@@ -292,4 +292,93 @@ function handleFileUpload($file) {
     return null;
 }
 
+// Get simple site-wide counts (trips, users, travel logs)
+function getSiteCounts() {
+    global $pdo;
+    try {
+        $counts = [];
+        $stmt = $pdo->query("SELECT COUNT(*) as c FROM trips");
+        $counts['trips'] = (int) $stmt->fetchColumn();
+
+        $stmt = $pdo->query("SELECT COUNT(*) as c FROM users");
+        $counts['users'] = (int) $stmt->fetchColumn();
+
+        $stmt = $pdo->query("SELECT COUNT(*) as c FROM travel_logs");
+        $counts['travel_logs'] = (int) $stmt->fetchColumn();
+
+        return $counts;
+    } catch (PDOException $e) {
+        error_log("Failed to fetch site counts: " . $e->getMessage());
+        return ['trips' => 0, 'users' => 0, 'travel_logs' => 0];
+    }
+}
+
+// Get upcoming/planned trips for a user
+function getUserPlannedTrips($userId, $limit = 10) {
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("SELECT ut.*, t.title, t.image_url, t.activity_type, t.duration_hours, t.price
+            FROM usertrips ut
+            LEFT JOIN trips t ON ut.trip_id = t.id
+            WHERE ut.user_id = ?
+            ORDER BY ut.created_at DESC
+            LIMIT ?");
+        $stmt->execute([$userId, (int)$limit]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Failed to fetch user planned trips: " . $e->getMessage());
+        return [];
+    }
+}
+
+// Get recent travel logs (with username)
+function getRecentTravelLogs($limit = 5) {
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("SELECT travel_logs.*, users.username FROM travel_logs JOIN users ON travel_logs.user_id = users.id ORDER BY travel_logs.created_at DESC LIMIT ?");
+        $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Failed to fetch recent travel logs: " . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Get flights to a destination country.
+ *
+ * Expected `flights` table (best-effort):
+ * id, airline, flight_number, from_airport, to_country, to_city,
+ * departure_datetime, arrival_datetime, available_seats, price
+ */
+function getFlightsByCountry($country, $limit = 50) {
+    global $pdo;
+    try {
+        $sql = "SELECT id, airline, flight_number, from_airport, to_country, to_city, departure_datetime, arrival_datetime, available_seats, price
+                FROM flights WHERE to_country = ? ORDER BY departure_datetime ASC LIMIT ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(1, $country);
+        $stmt->bindValue(2, (int)$limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // If the flights table doesn't exist or another error occurs, log and return empty array
+        error_log("getFlightsByCountry failed: " . $e->getMessage());
+        return [];
+    }
+}
+
+function getFlightById($flightId) {
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM flights WHERE id = ? LIMIT 1");
+        $stmt->execute([$flightId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("getFlightById failed: " . $e->getMessage());
+        return false;
+    }
+}
+
 ?>

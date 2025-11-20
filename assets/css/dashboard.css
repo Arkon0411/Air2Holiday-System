@@ -696,6 +696,28 @@ select option[hidden] {
     cursor: pointer;
 }
 
+/* Highlight a selected country on the map */
+#world-map path.map-selected {
+    fill: #e6b89e !important;
+    stroke: #b07a68;
+}
+
+/* Make the SVG map draggable and show appropriate cursors */
+#world-map {
+    cursor: grab;
+    touch-action: none; /* allow custom touch handling (pan/pinch) */
+    user-select: none;
+}
+
+#world-map.dragging {
+    cursor: grabbing;
+}
+
+/* Improve touch hit area on small devices */
+@media (max-width: 768px) {
+    #world-map { width: 100%; height: 100%; }
+}
+
 .greeting-container {
     display: flex;
     justify-content: center;
@@ -1044,6 +1066,10 @@ select option[hidden] {
         z-index: 1100;
     }
 
+     /* Overlay should be hidden and non-interactive by default (desktop).
+         It only becomes visible/interactive on small screens via the media query below. */
+     .overlay { display: none; pointer-events: none; }
+
     .overlay.active {
         display: block;
     }
@@ -1139,4 +1165,10 @@ select option[hidden] {
 
     
     
+}
+
+/* Ensure native form selects are above fixed sidebars/overlays so they remain clickable */
+select {
+    position: relative;
+    z-index: 1301; /* above .sidebar (1200) and .overlay (1100) */
 }

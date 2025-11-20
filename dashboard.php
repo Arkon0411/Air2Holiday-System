@@ -15,6 +15,11 @@ if (!isset($_SESSION['user_id'])) {
 require_once __DIR__ . '/includes/functions.php';
 $user = getUserById($_SESSION['user_id']);
 
+// Site counts and user planned trips (Air2Holiday integrations)
+$counts = getSiteCounts();
+$my_planned_trips = getUserPlannedTrips($user['id']);
+$recent_logs = getRecentTravelLogs(5);
+
 // Get trips from database
 $trips = [];
 try {
@@ -154,6 +159,60 @@ try {
                         From surfing 40-foot waves in the middle of the ocean to fishing for piranha in the Amazon, we've got it all.
                     </p>
                 </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="stats-container" style="display:flex; gap:1rem; margin-top:1rem;">
+                <div class="stat-card" style="background:#fff; padding:1rem; border-radius:.5rem; flex:1; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+                    <h3 style="margin:0;">Total Trips</h3>
+                    <p style="font-size:1.5rem; margin:0; font-weight:bold;"><?= number_format($counts['trips']) ?></p>
+                </div>
+                <div class="stat-card" style="background:#fff; padding:1rem; border-radius:.5rem; flex:1; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+                    <h3 style="margin:0;">Users</h3>
+                    <p style="font-size:1.5rem; margin:0; font-weight:bold;"><?= number_format($counts['users']) ?></p>
+                </div>
+                <div class="stat-card" style="background:#fff; padding:1rem; border-radius:.5rem; flex:1; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+                    <h3 style="margin:0;">Travel Logs</h3>
+                    <p style="font-size:1.5rem; margin:0; font-weight:bold;"><?= number_format($counts['travel_logs']) ?></p>
+                </div>
+            </div>
+
+            <!-- My Upcoming Trips and Recent Logs -->
+            <div style="display:flex; gap:1rem; margin-top:1rem;">
+                <section style="flex:1; background: rgba(255,255,255,0.9); padding:1rem; border-radius:0.5rem; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+                    <h3>My Planned Trips (<?= count($my_planned_trips) ?>)</h3>
+                    <?php if (empty($my_planned_trips)): ?>
+                        <p>No planned trips yet. Visit <a href="trip-planner.php">Trip Planner</a> to add one.</p>
+                    <?php else: ?>
+                        <ul style="list-style:none; padding:0; margin:0;">
+                            <?php foreach ($my_planned_trips as $mtp): ?>
+                                <li style="display:flex; gap:.75rem; align-items:center; padding:.5rem 0; border-bottom:1px solid #eee;">
+                                    <img src="<?= htmlspecialchars($mtp['image_url'] ?? 'assets/img/trip-placeholder.png') ?>" alt="" style="width:64px; height:44px; object-fit:cover; border-radius:.25rem;">
+                                    <div>
+                                        <strong><?= htmlspecialchars($mtp['title'] ?? 'Untitled') ?></strong>
+                                        <div style="font-size:.85rem; color:#666;">Planned: <?= htmlspecialchars($mtp['created_at']) ?></div>
+                                    </div>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php endif; ?>
+                </section>
+
+                <aside style="width:360px; background: rgba(255,255,255,0.95); padding:1rem; border-radius:0.5rem; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+                    <h3>Recent Travel Logs</h3>
+                    <?php if (empty($recent_logs)): ?>
+                        <p>No travel logs found.</p>
+                    <?php else: ?>
+                        <ul style="list-style:none; padding:0; margin:0;">
+                            <?php foreach ($recent_logs as $log): ?>
+                                <li style="padding:.5rem 0; border-bottom:1px solid #f0f0f0;">
+                                    <div style="font-weight:600"><?= htmlspecialchars($log['title']) ?></div>
+                                    <div style="font-size:.85rem; color:#666;">by <?= htmlspecialchars($log['username']) ?> · <?= date('M j, Y', strtotime($log['created_at'])) ?></div>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php endif; ?>
+                </aside>
             </div>
 
             <!-- Popular Destinations Section -->
