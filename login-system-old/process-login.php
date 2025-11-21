@@ -22,12 +22,13 @@ if (isAccountLocked($user)) {
     exit();
 }
 
-if ($password === $user['password']) {
+if ($user && isset($user['password_hash']) && password_verify($password, $user['password_hash'])) {
     resetFailedAttempts($user['id']);
-    
+
     $_SESSION['user_id'] = $user['id'];
-    $_SESSION['username'] = $user['username'];
-    
+    // prefer username if available, otherwise fall back to name
+    $_SESSION['username'] = $user['username'] ?? $user['name'] ?? '';
+
     header("Location: dashboard.php");
     exit();
 } else {
