@@ -1,0 +1,226 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body, html {
+  height: 100%;
+  background: #f8f9fa;
+}
+
+/* ====================== HEADER ====================== */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: #ffffff;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+.header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 26px;
+  font-weight: 700;
+  color: #222;
+  text-decoration: none;
+}
+
+.logo-small {
+  height: 42px;
+  width: auto;
+}
+
+.nav-links a {
+  margin-left: 32px;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: #0066cc;
+}
+
+.btn-signup {
+  background: #000;
+  color: #fff !important;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.btn-signup:hover {
+  background: #333;
+}
+
+/* ====================== MAIN CONTAINER ====================== */
+.container {
+  display: flex;
+  min-height: calc(100vh - 70px - 100px); /* 70px header + ~100px footer */
+  margin-top: 70px; /* push down below fixed header */
+}
+
+/* Left side - Airplane image */
+.left {
+  flex: 1;
+  background: url('plane.jpg') center/cover no-repeat;
+}
+
+/* Right side - Login form */
+.right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  padding: 40px;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+/* (All your existing login styles remain 100% unchanged below) */
+.logo { font-size: 42px; font-weight: 700; margin-bottom: 10px; color: #222; }
+.subtitle { font-size: 18px; color: #555; margin-bottom: 30px; line-height: 1.4; }
+
+.input-group { margin-bottom: 20px; text-align: left; }
+.input-group input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  outline: none;
+  transition: border 0.3s;
+}
+.input-group input:focus { border-color: #333; }
+
+.login-btn {
+  width: 100%;
+  padding: 14px;
+  background: #000;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background 0.3s;
+}
+.login-btn:hover { background: #333; }
+
+.or {
+  margin: 20px 0;
+  color: #888;
+  position: relative;
+}
+.or::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #ddd;
+}
+.or span {
+  background: #fff;
+  padding: 0 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.google-btn:hover { background: #f9f9f9; border-color: #ccc; }
+
+.terms { font-size: 13px; color: #777; margin: 25px 0 30px; }
+.terms a { color: #0066cc; text-decoration: none; }
+
+.register { font-size: 15px; color: #555; }
+.register a { color: #0066cc; text-decoration: none; font-weight: 600; }
+
+/* ====================== FOOTER ====================== */
+.footer {
+  background: #111;
+  color: #aaa;
+  padding: 35px 40px;
+  font-size: 14px;
+}
+
+.footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-right a {
+  color: #aaa;
+  margin-left: 30px;
+  text-decoration: none;
+}
+
+.footer-right a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* ====================== RESPONSIVE ====================== */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    margin-top: 70px;
+  }
+  .left {
+    flex: none;
+    height: 280px;
+  }
+  .right { padding: 30px 20px; }
+
+  .header-content,
+  .footer-content {
+    padding: 0 20px;
+    flex-direction: column;
+    text-align: center;
+  }
+  .nav-links a { margin: 12px 15px; }
+  .footer-right a { margin: 10px 15px; }
+}
