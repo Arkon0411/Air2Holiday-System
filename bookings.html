@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Air2Holiday - My Bookings</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="main-content">
+
+    <!-- HEADER – Bookings tab active -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">Air2Holiday</div>
+        <nav class="top-nav">
+          <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+          <a href="flights.html"><i class="fas fa-plane"></i> Flights</a>
+          <a href="#" class="active"><i class="fas fa-calendar-check"></i> Bookings</a>
+          <a href="#"><i class="fas fa-cog"></i> Settings</a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search bookings...">
+        </div>
+        <div class="profile">
+          <img src="girl.jpg" alt="User">
+        </div>
+      </div>
+    </header>
+
+    <!-- BOOKINGS SECTION -->
+    <section class="bookings-section">
+
+      <div class="page-header">
+        <h1 class="page-title">My Bookings</h1>
+        <p class="subtitle">You have <strong>3 active bookings</strong> with Philippine Airlines</p>
+      </div>
+
+      <!-- IMPORTANT NOTICE -->
+      <div class="policy-notice">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+          <strong>Important:</strong> Online bookings (promo fares) 
+          <span style="color:#E30613; font-weight:bold;">cannot be cancelled or rescheduled</span>.
+          Changes are not permitted after payment.
+        </div>
+      </div>
+
+      <!-- BOOKING LIST -->
+      <div class="booking-list">
+
+        <div class="booking-card">
+          <div class="booking-header">
+            <div class="airline">Philippine Airlines</div>
+            <div class="booking-id">Booking ID: <strong>PAL-2025-0481</strong></div>
+          </div>
+          <div class="route">Manila (MNL) → Tokyo Narita (NRT)</div>
+          <div class="details">
+            <p><strong>PR 428</strong> • 15 May 2025 • 10:30 AM → 02:55 PM</p>
+            <p>Seat: <strong>12F</strong> • Economy Class • Airbus A350-900</p>
+          </div>
+          <div class="status confirmed">Confirmed</div>
+          <div class="actions disabled">
+            <button disabled><i class="fas fa-ban"></i> Cancel</button>
+            <button disabled><i class="fas fa-calendar-alt"></i> Reschedule</button>
+          </div>
+        </div>
+
+        <div class="booking-card">
+          <div class="booking-header">
+            <div class="airline">Philippine Airlines</div>
+            <div class="booking-id">Booking ID: <strong>PAL-2025-0722</strong></div>
+          </div>
+          <div class="route">Cebu (CEB) → Singapore (SIN)</div>
+          <div class="details">
+            <p><strong>PR 853</strong> • 22 Jun 2025 • 06:15 PM → 09:55 PM</p>
+            <p>Seat: <strong>18A</strong> • Economy Class • A321</p>
+          </div>
+          <div class="status confirmed">Confirmed</div>
+          <div class="actions disabled">
+            <button disabled><i class="fas fa-ban"></i> Cancel</button>
+            <button disabled><i class="fas fa-calendar-alt"></i> Reschedule</button>
+          </div>
+        </div>
+
+        <div class="booking-card past">
+          <div class="booking-header">
+            <div class="airline">Philippine Airlines</div>
+            <div class="booking-id">Booking ID: <strong>PAL-2024-1190</strong></div>
+          </div>
+          <div class="route">Manila → Hong Kong</div>
+          <div class="details">
+            <p><strong>PR 300</strong> • 10 Mar 2025 • Completed</p>
+          </div>
+          <div class="status completed">Flight Completed</div>
+        </div>
+
+      </div>
+
+    </section>
+  </div>
+
+</body>
+</html>
