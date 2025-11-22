@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Air2Holiday - My Flights</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="main-content">
+
+    <!-- HEADER – Air2Holidays -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">Air2Holiday</div>
+        <nav class="top-nav">
+          <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+          <a href="#" class="active"><i class="fas fa-plane"></i> Flights</a>
+          <a href="#"><i class="fas fa-calendar-check"></i> Bookings</a>
+          <a href="#"><i class="fas fa-cog"></i> Settings</a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search flights...">
+        </div>
+        <div class="profile">
+          <img src="girl.jpg" alt="User">
+        </div>
+      </div>
+    </header>
+
+    <!-- FLIGHTS SECTION – Only Philippine Airlines -->
+    <section class="flights-section">
+
+      <h1 class="page-title">My Flights</h1>
+      <p class="subtitle">All flights operated by <strong>Philippine Airlines</strong></p>
+
+      <!-- Tabs -->
+      <div class="tabs-flight">
+        <button class="tab-btn active" data-tab="seats">Seat Selection</button>
+        <button class="tab-btn" data-tab="reservations">My Reservations</button>
+      </div>
+
+      <!-- SEAT SELECTION TAB -->
+      <div id="seats" class="tab-content active">
+        <div class="flight-info">
+          <div class="airline-logo">
+            <span style="color:#E30613; font-weight:bold;">Philippine Airlines</span>
+          </div>
+          <h2>Manila (MNL) to Tokyo Narita (NRT)</h2>
+          <p><strong>PR 428</strong> • 15 May 2025 • 04h 25m • Airbus A350-900 • Economy</p>
+        </div>
+
+        <div class="seat-map">
+          <div class="cabin">
+            <div class="row"><span class="row-num">1</span>
+              <span class="seat available">A</span><span class="seat available">B</span><span class="seat available">C</span>
+              <span class="aisle"></span>
+              <span class="seat available">D</span><span class="seat available">E</span><span class="seat selected">F</span>
+            </div>
+            <div class="row"><span class="row-num">2</span>
+              <span class="seat available">A</span><span class="seat taken">B</span><span class="seat available">C</span>
+              <span class="aisle"></span>
+              <span class="seat available">D</span><span class="seat available">E</span><span class="seat available">F</span>
+            </div>
+            <div class="row"><span class="row-num">3</span>
+              <span class="seat available">A</span><span class="seat available">B</span><span class="seat available">C</span>
+              <span class="aisle"></span>
+              <span class="seat available">D</span><span class="seat available">E</span><span class="seat available">F</span>
+            </div>
+            <!-- can add  more rows as needed bruh-->
+          </div>
+
+          <div class="legend">
+            <div><span class="legend-box available"></span> Available</div>
+            <div><span class="legend-box selected"></span> Your Selection</div>
+            <div><span class="legend-box taken"></span> Taken</div>
+          </div>
+
+          <button class="confirm-seat">Confirm Seat</button>
+        </div>
+      </div>
+
+      <!-- RESERVATIONS TAB – Only PAL Flights -->
+      <div id="reservations" class="tab-content">
+        <div class="reservation-list">
+
+          <div class="reservation-card">
+            <div class="airline">Philippine Airlines</div>
+            <div class="route">Manila to Tokyo (NRT)</div>
+            <div class="details">
+              <p><strong>PR 428</strong> • 15 May 2025 • 4h 25m • A350-900</p>
+              <p>Seat: <strong>1F</strong> • Economy Class</p>
+            </div>
+            <div class="status confirmed">Confirmed</div>
+          </div>
+
+          <div class="reservation-card">
+            <div class="airline">Philippine Airlines</div>
+            <div class="route">Cebu to Singapore</div>
+            <div class="details">
+              <p><strong>PR 853</strong> • 22 Jun 2025 • 3h 40m • A321</p>
+              <p>Seat: <strong>15A</strong> • Economy</p>
+            </div>
+            <div class="status confirmed">Confirmed</div>
+          </div>
+
+          <div class="reservation-card">
+            <div class="airline">Philippine Airlines</div>
+            <div class="route">Manila to Los Angeles</div>
+            <div class="details">
+              <p><strong>PR 102</strong> • 10 Jul 2025 • 13h 30m • Boeing 777-300ER</p>
+              <p>Seat: <strong>28K</strong> • Economy</p>
+            </div>
+            <div class="status pending">Check-in Opens Soon</div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+  </div>
+
+  <script>
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
+
+</body>
+</html>
