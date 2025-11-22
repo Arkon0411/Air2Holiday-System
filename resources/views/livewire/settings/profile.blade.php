@@ -5,10 +5,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use Livewire\Volt\Component;
+use Livewire\WithFileUploads;
 
 new class extends Component {
+    use WithFileUploads;
+
     public string $name = '';
     public string $email = '';
+    public $photo = null;
 
     /**
      * Mount the component.
@@ -51,6 +55,28 @@ new class extends Component {
     }
 
     /**
+     * Upload and set profile photo.
+     */
+    public function uploadProfilePhoto(): void
+    {
+        $user = Auth::user();
+
+        // Regular file upload
+        $this->validate([
+            'photo' => ['required', 'image', 'max:2048'],
+        ]);
+
+        $path = $this->photo->store('profile-photos', 'public');
+
+        $user->profile_photo = $path;
+        $user->save();
+
+        $this->dispatch('profile-photo-updated', path: $path);
+    }
+
+    
+
+    /**
      * Send an email verification notification to the current user.
      */
     public function resendVerificationNotification(): void
@@ -74,6 +100,30 @@ new class extends Component {
 
     <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2">Profile photo</label>
+                <div wire:ignore>
+                <div class="flex items-center gap-4">
+                    <div>
+                        @if (auth()->user()->profile_photo)
+                            <img id="profilePreview" src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="avatar" class="w-20 h-20 rounded-full object-cover border" />
+                        @else
+                            <img id="profilePreview" src="{{ asset('img/girl.jpg') }}" alt="avatar" class="w-20 h-20 rounded-full object-cover border" />
+                        @endif
+                    </div>
+                    <div>
+                        <input id="photoInput" type="file" accept="image/*" wire:model="photo" />
+                        <div class="mt-2">
+                            <flux:button wire:click.prevent="uploadProfilePhoto" variant="outline">Save photo</flux:button>
+                            <flux:button id="selectFileBtn" variant="outline" onclick="document.getElementById('photoInput').click(); return false;">Change photo</flux:button>
+                        </div>
+                        @error('photo') <div class="text-sm text-red-600 mt-2">{{ $message }}</div> @enderror
+                    </div>
+                </div>
+                </div>
+
+                <!-- Cropping removed: file input will be uploaded directly -->
+            </div>
             <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
 
             <div>
