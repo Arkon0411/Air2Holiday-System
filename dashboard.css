@@ -42,7 +42,7 @@ body {
   color: #222;
 }
 
-/* Top Navigation (former sidebar items) */
+/* Top Navigation */
 .top-nav {
   display: flex;
   gap: 10px;
@@ -608,3 +608,4 @@ body {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
