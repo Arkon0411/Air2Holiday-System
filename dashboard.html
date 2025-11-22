@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Air2Holiday - Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- MAIN CONTENT (no sidebar anymore) -->
+  <div class="main-content">
+
+    <!-- TOP HEADER WITH LOGO + NAV + SEARCH + PROFILE -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">Air2Holiday</div>
+        
+        <!-- Navigation moved from sidebar -->
+        <nav class="top-nav">
+          <a href="#" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+          <a href="#"><i class="fas fa-plane"></i> Flights</a>
+          <a href="#"><i class="fas fa-calendar-check"></i> Bookings</a>
+          <a href="#"><i class="fas fa-cog"></i> Settings</a>
+        </nav>
+      </div>
+
+      <div class="header-right">
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search...">
+        </div>
+
+        <div class="profile">
+          <img src="girl.jpg" alt="User">
+        </div>
+      </div>
+    </header>
+
+    <!-- DASHBOARD BODY (unchanged) -->
+    <section class="dashboard">
+      <div class="welcome">
+        <h1>Hello, user!</h1>
+        <p>Welcome back</p>
+      </div>
+
+      <h2 class="section-title">Choose your destination</h2>
+
+      <div class="destinations">
+        <div class="card">
+          <img src="place1.jpg" alt="place">
+          <div class="card-info">
+            <h3>Monstadt</h3>
+            <p>Starting at <strong>100$</strong></p>
+          </div>
+        </div>
+        <div class="card">
+          <img src="place2.jpg" alt="place">
+          <div class="card-info">
+            <h3>Sydney</h3>
+            <p>Starting at <strong>100$</strong></p>
+          </div>
+        </div>
+        <div class="card">
+          <img src="hell.jpg" alt="place3">
+          <div class="card-info">
+            <h3>Manila</h3>
+            <p>Starting at <strong>100$</strong></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <span class="active">Most Popular</span>
+        <span>Special Offers</span>
+        <span>Near Me</span>
+        <a href="#" class="view-all">View All</a>
+      </div>
+
+      <div class="popular">
+        <div class="place">
+          <img src="tokyo.jpg" alt="Tokyo">
+          <div class="place-info">
+            <h4>Tokyo</h4>
+            <p>40$ / day</p>
+          </div>
+        </div>
+        <div class="place">
+          <img src="osaka.jpg" alt="Osaka">
+          <div class="place-info">
+            <h4>Osaka</h4>
+            <p>40$ / day</p>
+          </div>
+        </div>
+        <div class="place">
+          <img src="fontaine.jpg" alt="Fontaine">
+          <div class="place-info">
+            <h4>Fontaine</h4>
+            <p>Starting Apr 20</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bookings">
+        <h3>Bookings <span class="count">2022</span></h3>
+        <a href="#" class="view-all">View All</a>
+      </div>
+    </section>
+  </div>
+
+</body>
+</html>
