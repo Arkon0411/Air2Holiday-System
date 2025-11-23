@@ -16,8 +16,19 @@ new class extends Component {
             'password' => ['required', 'string', 'current_password'],
         ]);
 
-        tap(Auth::user(), $logout(...))->delete();
+        // Ensure we have an Eloquent User instance before calling delete()
+        $user = \App\Models\User::find(Auth::id());
 
+        if ($user instanceof \Illuminate\Database\Eloquent\Model) {
+            $user->delete();
+
+            // Log the user out and invalidate the session
+            Auth::guard('web')->logout();
+            session()->invalidate();
+            session()->regenerateToken();
+        }
+
+        // Redirect to the homepage (Livewire navigation)
         $this->redirect('/', navigate: true);
     }
 }; ?>

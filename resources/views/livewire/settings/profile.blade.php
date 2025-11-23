@@ -19,8 +19,15 @@ new class extends Component {
      */
     public function mount(): void
     {
-        $this->name = Auth::user()->name;
-        $this->email = Auth::user()->email;
+        $user = \App\Models\User::find(Auth::id());
+
+        if ($user) {
+            $this->name = $user->name;
+            $this->email = $user->email;
+        } else {
+            $this->name = '';
+            $this->email = '';
+        }
     }
 
     /**
@@ -28,7 +35,11 @@ new class extends Component {
      */
     public function updateProfileInformation(): void
     {
-        $user = Auth::user();
+        $user = \App\Models\User::find(Auth::id());
+
+        if (! $user) {
+            return;
+        }
 
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -59,19 +70,57 @@ new class extends Component {
      */
     public function uploadProfilePhoto(): void
     {
-        $user = Auth::user();
+        $user = \App\Models\User::find(Auth::id());
+
+        if (! $user) {
+            return;
+        }
 
         // Regular file upload
         $this->validate([
             'photo' => ['required', 'image', 'max:2048'],
         ]);
 
-        $path = $this->photo->store('profile-photos', 'public');
+        // Build a safe filename and move the uploaded file into public/img
+        $extension = strtolower($this->photo->getClientOriginalExtension() ?: $this->photo->extension() ?: 'png');
+        $filename = uniqid('profile_', true) . '.' . $extension;
 
-        $user->profile_photo = $path;
+        $destinationDir = public_path('img');
+
+        // Ensure destination directory exists and is writable
+        if (! is_dir($destinationDir)) {
+            @mkdir($destinationDir, 0755, true);
+        }
+
+        $moved = false;
+
+        try {
+            // Try the built-in move() first
+            $this->photo->move($destinationDir, $filename);
+            $moved = true;
+        } catch (\Throwable $e) {
+            // Fall back to copying the temporary uploaded file if move() fails
+            $tempPath = $this->photo->getRealPath() ?: $this->photo->getPathname();
+
+            if ($tempPath && is_file($tempPath)) {
+                $destPath = $destinationDir . DIRECTORY_SEPARATOR . $filename;
+                @copy($tempPath, $destPath);
+                $moved = is_file($destPath);
+            }
+        }
+
+        if (! $moved) {
+            // If we still failed, abort silently (or you can add an error)
+            $this->addError('photo', 'Failed to save uploaded image.');
+            return;
+        }
+
+        // Save relative web path (public/img/<file>) on the model
+        $user->profile_photo = 'img/' . $filename;
         $user->save();
 
-        $this->dispatch('profile-photo-updated', path: $path);
+        // Dispatch browser event with the new public patha
+        $this->dispatch('profile-photo-updated', path: $user->profile_photo);
     }
 
     
@@ -79,40 +128,43 @@ new class extends Component {
     /**
      * Send an email verification notification to the current user.
      */
-    public function resendVerificationNotification(): void
+    // Email verification has been removed from this application.
+    // Previous `resendVerificationNotification` logic intentionally removed.
+
+    /**
+     * Return the authenticated user as an Eloquent model instance, or null.
+     */
+    private function getUser(): ?\App\Models\User
     {
-        $user = Auth::user();
+        $id = Auth::id();
 
-        if ($user->hasVerifiedEmail()) {
-            $this->redirectIntended(default: route('dashboard', absolute: false));
-
-            return;
+        if (! $id) {
+            return null;
         }
 
-        $user->sendEmailVerificationNotification();
-
-        Session::flash('status', 'verification-link-sent');
+        return \App\Models\User::find($id);
     }
 }; ?>
 
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
+    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name, email, and profile photo.')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
             <div class="mb-6">
                 <label class="block text-sm font-medium mb-2">Profile photo</label>
                 <div wire:ignore>
                 <div class="flex items-center gap-4">
                     <div>
-                        @if (auth()->user()->profile_photo)
-                            <img id="profilePreview" src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="avatar" class="w-20 h-20 rounded-full object-cover border" />
+                        @php $pp = auth()->user()->profile_photo ?? null; @endphp
+                        @if ($pp)
+                            <img id="profilePreview" src="{{ asset($pp) }}" alt="avatar" class="w-14 h-14 rounded-full object-cover border" />
                         @else
-                            <img id="profilePreview" src="{{ asset('img/girl.jpg') }}" alt="avatar" class="w-20 h-20 rounded-full object-cover border" />
+                            <img id="profilePreview" src="{{ asset('img/default.jpg') }}" alt="avatar" class="w-10 h-10 rounded-full object-cover border" />
                         @endif
                     </div>
                     <div>
-                        <input id="photoInput" type="file" accept="image/*" wire:model="photo" />
+                        <input class="text-sm text-gray-600" id="photoInput" type="file" accept="image/*" wire:model="photo" />
                         <div class="mt-2">
                             <flux:button wire:click.prevent="uploadProfilePhoto" variant="outline">Save photo</flux:button>
                             <flux:button id="selectFileBtn" variant="outline" onclick="document.getElementById('photoInput').click(); return false;">Change photo</flux:button>
@@ -129,23 +181,7 @@ new class extends Component {
             <div>
                 <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
 
-                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
-                    <div>
-                        <flux:text class="mt-4">
-                            {{ __('Your email address is unverified.') }}
-
-                            <flux:link class="text-sm cursor-pointer" wire:click.prevent="resendVerificationNotification">
-                                {{ __('Click here to re-send the verification email.') }}
-                            </flux:link>
-                        </flux:text>
-
-                        @if (session('status') === 'verification-link-sent')
-                            <flux:text class="mt-2 font-medium !dark:text-green-400 !text-green-600">
-                                {{ __('A new verification link has been sent to your email address.') }}
-                            </flux:text>
-                        @endif
-                    </div>
-                @endif
+                {{-- Email verification UI removed --}}
             </div>
 
             <div class="flex items-center gap-4">
