@@ -58,10 +58,25 @@
 
   // Refresh profile image when Livewire notifies of an update
   function refreshProfileImage() {
-    if (!profileBtn) return;
-    const src = profileBtn.getAttribute('src') || '';
-    const base = src.split('?')[0];
-    profileBtn.setAttribute('src', base + '?t=' + Date.now());
+    const imgs = document.querySelectorAll('.profile-image');
+    if (!imgs || imgs.length === 0) return;
+    imgs.forEach(img => {
+      const src = img.getAttribute('src') || '';
+      const base = src.split('?')[0];
+
+      // Fade out, update src with cache-busting timestamp, then fade back in on load
+      try { img.style.opacity = '0'; } catch (e) {}
+
+      const newSrc = base + '?t=' + Date.now();
+      // Attach onload to fade in after new image finishes loading
+      img.onload = function () {
+        try { img.style.opacity = '1'; } catch (e) {}
+        // remove handler after run
+        img.onload = null;
+      };
+
+      img.setAttribute('src', newSrc);
+    });
   }
 
   // Listen for Livewire event (if Livewire is present)
