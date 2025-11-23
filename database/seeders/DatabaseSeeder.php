@@ -23,5 +23,8 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+
+        // Seed a sample flight for manual testing
+        $this->call(\Database\Seeders\SampleFlightSeeder::class);
     }
 }

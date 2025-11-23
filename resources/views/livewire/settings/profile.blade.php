@@ -156,12 +156,7 @@ new class extends Component {
                 <div wire:ignore>
                 <div class="flex items-center gap-4">
                     <div>
-                        @php $pp = auth()->user()->profile_photo ?? null; @endphp
-                        @if ($pp)
-                            <img id="profilePreview" src="{{ asset($pp) }}" alt="avatar" class="w-14 h-14 rounded-full object-cover border" />
-                        @else
-                            <img id="profilePreview" src="{{ asset('img/default.jpg') }}" alt="avatar" class="w-10 h-10 rounded-full object-cover border" />
-                        @endif
+                        <flux:avatar id="profilePreview" src="{{ auth()->user()->profile_photo_url }}" :name="auth()->user()->name" size="lg" circle class="border" />
                     </div>
                     <div>
                         <input class="text-sm text-zinc-400" id="photoInput" type="file" accept="image/*" wire:model="photo" />

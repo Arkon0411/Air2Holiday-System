@@ -16,9 +16,17 @@ Route::view('bookings', 'bookings')
     ->middleware(['auth', 'verified'])
     ->name('bookings');
 
-// Serve the flights page as a Laravel view so we can render dynamic results
-// and stop relying on a static `public/flights.html` file.
-Route::view('flights', 'flights')->name('flights');
+// Booking endpoint: create a booking for an authenticated user
+use App\Http\Controllers\BookingController;
+
+Route::post('book-flight', [BookingController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('book.flight');
+
+// Save selected seat for an existing booking
+Route::post('bookings/{booking}/seat', [BookingController::class, 'updateSeat'])
+    ->middleware(['auth', 'verified'])
+    ->name('booking.seat');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
