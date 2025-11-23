@@ -14,14 +14,17 @@
                 <flux:navbar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:navbar.item>
-                <flux:navbar.item icon="book-open-text" :href="route('bookings')" :current="request()->routeIs('bookings')" wire:navigate>
+            </flux:navbar>
+
+            <flux:navbar class="-mb-px max-lg:hidden    ">
+                <flux:navbar.item icon="book-open" :href="route('bookings')" :current="request()->routeIs('bookings')" wire:navigate>
                     {{ __('Bookings') }}
                 </flux:navbar.item>
             </flux:navbar>
 
             <flux:spacer />
 
-            <flux:navbar class="me-1.5 space-x-0.5 rtl:space-x-reverse py-0!">
+            <flux:navbar class="me-1.5 space-x-0.5 rtl:space-x-reverse">
                 <flux:tooltip :content="__('Search')" position="bottom">
                     <flux:navbar.item class="!h-10 [&>div>svg]:size-5" icon="magnifying-glass" href="#" :label="__('Search')" />
                 </flux:tooltip>
@@ -31,19 +34,18 @@
             <flux:dropdown position="top" align="end">
                 <flux:profile
                     class="cursor-pointer"
-                    :initials="auth()->user()->initials()"
-                    :name="auth()->user()->name"
-                    avatar:src="{{ auth()->user()->profile_photo_url }}"
-                    avatar:class="profile-image w-8 h-8 rounded-full object-cover"
+                    src="{{ asset(auth()->user()->profile_photo ?? 'img/default.jpg') }}"
+                    alt="{{ auth()->user()->name }}"
+                    avatar="{{ asset(auth()->user()->profile_photo ?? 'img/default.jpg') }}"
                 />
 
                 <flux:menu>
                     <flux:menu.radio.group>
                         <div class="p-0 text-sm font-normal">
                             <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-                                <div class="shrink-0">
-                                    <flux:avatar src="{{ auth()->user()->profile_photo_url }}" size="sm" circle class="profile-image" />
-                                </div>
+                                <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
+                                    <img src="{{ asset(auth()->user()->profile_photo ?? 'img/default.jpg') }}" alt="{{ auth()->user()->name }}" class="h-full w-full object-cover rounded-lg" />
+                                </span>
 
                                 <div class="grid flex-1 text-start text-sm leading-tight">
                                     <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
