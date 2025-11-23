@@ -17,7 +17,7 @@
             </flux:navbar>
 
             <flux:navbar class="-mb-px max-lg:hidden    ">
-                <flux:navbar.item icon="layout-grid" :href="route('bookings')" :current="request()->routeIs('bookings')" wire:navigate>
+                <flux:navbar.item icon="book-open" :href="route('bookings')" :current="request()->routeIs('bookings')" wire:navigate>
                     {{ __('Bookings') }}
                 </flux:navbar.item>
             </flux:navbar>
@@ -34,31 +34,18 @@
             <flux:dropdown position="top" align="end">
                 <flux:profile
                     class="cursor-pointer"
-<<<<<<< HEAD
                     src="{{ asset(auth()->user()->profile_photo ?? 'img/default.jpg') }}"
                     alt="{{ auth()->user()->name }}"
                     avatar="{{ asset(auth()->user()->profile_photo ?? 'img/default.jpg') }}"
-=======
-                    :initials="auth()->user()->initials()"
-                    :name="auth()->user()->name"
-                    avatar:src="{{ auth()->user()->profile_photo_url }}"
-                    avatar:class="profile-image w-8 h-8 rounded-full object-cover"
->>>>>>> 5dfd71560973fa5777e52630be65710f74de4798
                 />
 
                 <flux:menu>
                     <flux:menu.radio.group>
                         <div class="p-0 text-sm font-normal">
                             <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-<<<<<<< HEAD
                                 <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
                                     <img src="{{ asset(auth()->user()->profile_photo ?? 'img/default.jpg') }}" alt="{{ auth()->user()->name }}" class="h-full w-full object-cover rounded-lg" />
                                 </span>
-=======
-                                <div class="shrink-0">
-                                    <flux:avatar src="{{ auth()->user()->profile_photo_url }}" size="sm" circle class="profile-image" />
-                                </div>
->>>>>>> 5dfd71560973fa5777e52630be65710f74de4798
 
                                 <div class="grid flex-1 text-start text-sm leading-tight">
                                     <span class="truncate font-semibold">{{ auth()->user()->name }}</span>

@@ -164,7 +164,7 @@ new class extends Component {
                         @endif
                     </div>
                     <div>
-                        <input class="text-sm text-gray-600" id="photoInput" type="file" accept="image/*" wire:model="photo" />
+                        <input class="text-sm text-zinc-400" id="photoInput" type="file" accept="image/*" wire:model="photo" />
                         <div class="mt-2">
                             <flux:button wire:click.prevent="uploadProfilePhoto" variant="outline">Save photo</flux:button>
                             <flux:button id="selectFileBtn" variant="outline" onclick="document.getElementById('photoInput').click(); return false;">Change photo</flux:button>

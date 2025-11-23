@@ -3,7 +3,7 @@
     <head>
         @include('partials.head')
     </head>
-    <body>
+    <body class="min-h-screen bg-white dark:bg-zinc-800">
         <flux:sidebar sticky>
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
