@@ -25,9 +25,9 @@
             <div class="w-full lg:p-8">
                 <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
                     <!-- Mobile Logo -->
-                    <a href="{{ route('home') }}" class="z-20 flex items-center justify-center gap-2 text-lg font-medium text-black dark:text-white lg:justify-start" wire:navigate>
+                        <a href="{{ route('home') }}" class="z-20 flex items-center justify-center gap-2 text-lg font-medium text-black dark:text-white lg:justify-start" wire:navigate>
                         <span class="flex h-9 w-9 items-center justify-center rounded-md">
-                            <x-app-logo-icon class="size-9 fill-current" />
+                            <x-app-logo-icon class="size-9 fill-current items-center justify-center " />
                         </span>
                         Air2Holidays
                     </a>
