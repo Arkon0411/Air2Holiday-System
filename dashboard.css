@@ -105,6 +105,12 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+/* Profile image transition used when avatars update dynamically */
+.profile-image {
+  transition: opacity 220ms ease-in-out;
+  opacity: 1;
+}
+
 /* Dashboard Content */
 .dashboard {
   max-width: 1200px;
