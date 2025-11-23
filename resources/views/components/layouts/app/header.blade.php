@@ -31,6 +31,7 @@
             </flux:navbar>
 
             <!-- Desktop User Menu -->
+            @auth
             <flux:dropdown position="top" align="end">
                 <flux:profile
                     class="cursor-pointer"
@@ -71,6 +72,17 @@
                     </form>
                 </flux:menu>
             </flux:dropdown>
+            @endauth
+
+            @guest
+                <div class="hidden lg:block">
+                    <flux:button     :href="route('login')" class="me-3">{{ __('Log In') }}</flux:button-link>
+                    <flux:button variant="primary"     :href="route('register')" class="me-3">{{ __('Register') }}</flux:button-link>
+                </div>
+            @endguest
+            
+            
+
         </flux:header>
 
         <!-- Mobile Menu -->

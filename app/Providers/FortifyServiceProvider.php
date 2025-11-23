@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use App\Http\Responses\LoginResponse as AppLoginResponse;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -29,6 +31,9 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+
+        // Bind a custom login response so we can redirect based on usertype
+        $this->app->singleton(LoginResponseContract::class, AppLoginResponse::class);
     }
 
     /**

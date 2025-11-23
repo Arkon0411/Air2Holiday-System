@@ -7,7 +7,7 @@
 
         @php
           $flights = \App\Models\Flight::with('arrivalAirport')->get();
-          $destinations = $flights->unique('arrival_airport_id')->take(6);
+          $destinations = $flights->unique('arrival_airport_id')->values();
         @endphp
 
         <div class="destinations grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">

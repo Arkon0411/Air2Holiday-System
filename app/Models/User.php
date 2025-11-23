@@ -24,7 +24,19 @@ class User extends Authenticatable
         'email',
         'profile_photo',
         'password',
+        'usertype',
     ];
+
+    /**
+     * The user type: 'user', 'admin', or 'airline'.
+     *
+     * @var string
+     */
+    protected $attributes = [
+        'usertype' => 'user',
+    ];
+
+    
 
     /**
      * The attributes that should be hidden for serialization.
@@ -61,6 +73,30 @@ class User extends Authenticatable
             ->take(2)
             ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
+    }
+
+    /**
+     * Check if user is an admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->usertype === 'admin';
+    }
+
+    /**
+     * Check if user is airline
+     */
+    public function isAirline(): bool
+    {
+        return $this->usertype === 'airline';
+    }
+
+    /**
+     * Check if regular user
+     */
+    public function isUser(): bool
+    {
+        return $this->usertype === 'user';
     }
 
     /**
