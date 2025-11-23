@@ -16,13 +16,27 @@
   // Destination cards - navigate to flights page with query param
   qsa('.card[data-destination]').forEach(card => {
     card.style.cursor = 'pointer';
-    card.addEventListener('click', function () {
+    card.addEventListener('click', function (e) {
+      // If the card is an anchor, prefer its href (which may be a Laravel route).
+      const href = this.getAttribute && this.getAttribute('href');
+      if (href) {
+        // let the native anchor behavior handle navigation for middle-click/ctrl-click
+        if (e.defaultPrevented === false) {
+          // allow default for normal anchor click
+          return;
+        }
+        window.location.href = href;
+        return;
+      }
+
       const dest = this.dataset.destination || '';
       const slug = dest.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      // Try flights page; fallback to current page alert
-      const target = '/flights.html?dest=' + encodeURIComponent(slug);
+      // Try flights page (Laravel route); fallback to static path if needed
+      const target = '/flights?dest=' + encodeURIComponent(slug);
       window.location.href = target;
     });
+    // Support keyboard activation for non-anchor cards
+    card.addEventListener('keydown', function (e) { if (e.key === 'Enter') this.click(); });
   });
 
   // Search functionality
@@ -36,7 +50,7 @@
       return;
     }
     // Redirect to flights page with search query
-    const href = '/flights.html?search=' + encodeURIComponent(q);
+    const href = '/flights?search=' + encodeURIComponent(q);
     window.location.href = href;
   }
   if (searchBtn) searchBtn.addEventListener('click', doSearch);

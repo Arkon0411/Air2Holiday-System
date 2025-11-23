@@ -16,6 +16,10 @@ Route::view('bookings', 'bookings')
     ->middleware(['auth', 'verified'])
     ->name('bookings');
 
+// Serve the flights page as a Laravel view so we can render dynamic results
+// and stop relying on a static `public/flights.html` file.
+Route::view('flights', 'flights')->name('flights');
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 

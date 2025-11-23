@@ -141,11 +141,23 @@ body {
   overflow: hidden;
   box-shadow: 0 6px 20px rgba(0,0,0,0.1);
   width: 300px;
-  transition: transform 0.3s;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .card:hover {
   transform: translateY(-10px);
+}
+
+/* Accessible focus styles for clickable cards (anchors) */
+.card:focus,
+.card:focus-visible {
+  outline: none;
+  transform: translateY(-6px);
+  box-shadow: 0 10px 30px rgba(0,102,204,0.18), 0 6px 12px rgba(0,0,0,0.08);
+}
+
+.card:active {
+  transform: translateY(-2px);
 }
 
 .card img {
