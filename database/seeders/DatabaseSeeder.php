@@ -23,5 +23,11 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+
+        $this->call([
+            AirportsTableSeeder::class,
+            FlightsTableSeeder::class,
+            SeatsTableSeeder::class,
+        ]);
     }
 }
