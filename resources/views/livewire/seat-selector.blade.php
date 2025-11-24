@@ -33,7 +33,7 @@
                         @php $seat = $row.$col; $taken = false; @endphp
                         <button type="button"
                             wire:click.prevent="selectSeat('{{ $seat }}')"
-                            class="size-8 rounded-md text-white shadow-xs"
+                            class="size-8 rounded-md text-white shadow-xs hover:scale-105 transform transition duration-150 ease-in-out"
                             :class="{
                                 'bg-red-500 cursor-not-allowed': false,
                                 'bg-green-500': '{{ $selectedSeat ?? '' }}' === '{{ $seat }}',

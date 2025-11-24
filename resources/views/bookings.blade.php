@@ -82,7 +82,7 @@
                             <div class="mt-2 grid grid-cols-6 gap-2">
                               @foreach($cols as $col)
                                 @php $seat = $row.$col; @endphp
-                                <button type="button" class="seat-btn bg-zinc-800 px-2 py-2 rounded text-sm" data-seat="{{ $seat }}">{{ $seat }}</button>
+                                <button type="button" class="seat-btn bg-zinc-800 px-2 py-2 rounded text-sm hover:bg-zinc-700 hover:scale-105 transform transition duration-150 ease-in-out" data-seat="{{ $seat }}">{{ $seat }}</button>
                               @endforeach
                             </div>
                           @endfor
@@ -135,7 +135,7 @@
             <div id="tab-reservations" class="tab-content mt-6" style="display:none">
               @foreach($bookings as $b)
                 @php $f = $b->flight; @endphp
-                <div class="mb-3 p-3 bg-white dark:bg-zinc-800 rounded-md">
+                <div class="mb-3 p-3 bg-white dark:bg-zinc-800 rounded-md reservation-card cursor-pointer transform transition hover:-translate-y-1 hover:shadow-lg">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center gap-4">
                       <div class="airline-logo text-sm text-red-600 font-semibold">Philippine Airlines</div>
@@ -205,5 +205,17 @@
           const params = new URLSearchParams(window.location.search);
           const initialTab = params.get('tab') || 'seat';
           setActiveTab(initialTab);
+
+          // Reservation card selection (single-select)
+          const reservationCards = document.querySelectorAll('.reservation-card');
+          reservationCards.forEach(card => {
+            card.addEventListener('click', () => {
+              reservationCards.forEach(c => c.classList.remove('ring-2','ring-accent','ring-offset-2'));
+              reservationCards.forEach(c => c.classList.remove('bg-zinc-800'));
+              card.classList.add('ring-2','ring-accent','ring-offset-2');
+              // visually keep dark background when selected
+              card.classList.add('bg-zinc-800');
+            });
+          });
         })();
       </script>
