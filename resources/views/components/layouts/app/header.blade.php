@@ -35,18 +35,19 @@
             <flux:dropdown position="top" align="end">
                 <flux:profile
                     class="cursor-pointer"
-                    src="{{ asset(auth()->user()->profile_photo ?? 'img/default.jpg') }}"
-                    alt="{{ auth()->user()->name }}"
-                    avatar="{{ asset(auth()->user()->profile_photo ?? 'img/default.jpg') }}"
+                    :name="auth()->user()->name"
+                    :initials="auth()->user()->initials()"
+                    avatar:src="{{ auth()->user()->profile_photo_url }}"
+                    avatar:class="w-8 h-8 rounded-full object-cover"
                 />
 
                 <flux:menu>
                     <flux:menu.radio.group>
                         <div class="p-0 text-sm font-normal">
                             <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-                                <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
-                                    <img src="{{ asset(auth()->user()->profile_photo ?? 'img/default.jpg') }}" alt="{{ auth()->user()->name }}" class="h-full w-full object-cover rounded-lg" />
-                                </span>
+                                <div class="shrink-0">
+                                    <flux:avatar src="{{ auth()->user()->profile_photo_url }}" size="sm" circle />
+                                </div>
 
                                 <div class="grid flex-1 text-start text-sm leading-tight">
                                     <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
