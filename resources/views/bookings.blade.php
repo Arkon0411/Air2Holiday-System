@@ -1,6 +1,5 @@
-      <x-layouts.app.header>
+<x-layouts.app.header>
         <div class="container mx-auto px-4 py-6">
-        <h2 class="section-title">My Flights</h2>
 
           @php
           $userId = auth()->id() ?? 0;
@@ -18,9 +17,9 @@
             ->orderBy('scheduled_departure')
             ->take(8)
             ->get();
-        @endphp
+          @endphp
 
-        <div class="mt-4 bg-white dark:bg-zinc-800 rounded-lg shadow-sm overflow-hidden">
+        <div class="mt-4 bg-white bg-zinc-100 dark:bg-zinc-600 rounded-lg shadow-sm overflow-hidden">
           <div class="p-4">
             @if(session('success'))
               <div class="mb-3 p-2 rounded bg-green-100 text-green-800">{{ session('success') }}</div>
@@ -28,11 +27,10 @@
             @if(session('error'))
               <div class="mb-3 p-2 rounded bg-red-100 text-red-800">{{ session('error') }}</div>
             @endif
-            <flux:heading size="lg">My Flights</flux:heading>
             <div class="mt-4">
               <div class="flex gap-2" role="tablist">
-                <button type="button" data-tab="seat" class="tab-btn active px-3 py-1 rounded bg-zinc-800 text-sm">Seat Selection</button>
-                <button type="button" data-tab="reservations" class="tab-btn px-3 py-1 rounded bg-zinc-700 text-sm">My Reservations</button>
+                <flux:button data-tab="seat">Seat Selection</flux:button>
+                <flux:button data-tab="reservations">Reservations</flux:button>
               </div>
             </div>
 
@@ -63,38 +61,92 @@
                       @csrf
                       <input type="hidden" name="seat_number" id="selectedSeatInput" value="{{ $first->seat_number ?? '' }}">
 
-                      <div class="mb-3 p-3 bg-blue-700 text-white rounded-t-md">
+              
+
+                      <div class="p-4 bg-zinc-900 text-white rounded-md">
+                        <div class="seat-grid">
+                          <div class="mb-3 p-3 bg-blue-700 text-white rounded-md">
                         <div class="text-xs">Philippine Airlines</div>
                         <div class="text-lg font-semibold">{{ optional($flight)->departure_airport_id ?? 'MNL' }} to {{ optional($flight)->arrival_airport_id ?? 'NRT' }}</div>
                         <div class="text-xs">{{ optional($flight)->flight_number ?? 'PR 428' }}</div>
                       </div>
-
-                      <div class="p-4 bg-zinc-900 text-white rounded-b-md">
-                        <div class="seat-grid">
                           @php $cols = ['A','B','C','D','E','F']; @endphp
-                          <div class="grid grid-cols-6 gap-2 text-center text-xs text-zinc-300">
-                            @foreach($cols as $col)
-                              <div>{{ $col }}</div>
-                            @endforeach
+          
+
+                          {{-- Business Class Section (Rows 1-2) --}}
+                          <div class="mb-6">
+                            <div class="text-xs text-zinc-400 mb-2 text-center">Business Class</div>
+                            @for($row=1;$row<=2;$row++)
+                              <div class="flex items-center justify-center gap-2 mb-2">
+                                {{-- Left side seats (A,B,C) --}}
+                                <div class="flex gap-1">
+                                  @foreach(['A','B','C'] as $col)
+                                    @php $seat = $row.$col; @endphp
+                                    <button type="button" class="seat-btn bg-zinc-800 w-8 h-8 rounded text-xs hover:bg-zinc-700 hover:scale-105 transform transition duration-150 ease-in-out flex items-center justify-center" data-seat="{{ $seat }}">{{ $seat }}</button>
+                                  @endforeach
+                                </div>
+                                
+                                {{-- Aisle gap --}}
+                                <div class="w-4"></div>
+                                
+                                {{-- Right side seats (D,E,F) --}}
+                                <div class="flex gap-1">
+                                  @foreach(['D','E','F'] as $col)
+                                    @php $seat = $row.$col; @endphp
+                                    <button type="button" class="seat-btn bg-zinc-800 w-8 h-8 rounded text-xs hover:bg-zinc-700 hover:scale-105 transform transition duration-150 ease-in-out flex items-center justify-center" data-seat="{{ $seat }}">{{ $seat }}</button>
+                                  @endforeach
+                                </div>
+                              </div>
+                            @endfor
                           </div>
 
-                          @for($row=1;$row<=6;$row++)
-                            <div class="mt-2 grid grid-cols-6 gap-2">
-                              @foreach($cols as $col)
-                                @php $seat = $row.$col; @endphp
-                                <button type="button" class="seat-btn bg-zinc-800 px-2 py-2 rounded text-sm hover:bg-zinc-700 hover:scale-105 transform transition duration-150 ease-in-out" data-seat="{{ $seat }}">{{ $seat }}</button>
-                              @endforeach
+                          {{-- Separator between Business and Economy --}}
+
+                          {{-- Economy Class Section (Rows 3-6) --}}
+                          <div>
+                            <div class="text-xs text-zinc-400 mb-2 text-center">Economy Class</div>
+                            @for($row=3;$row<=6;$row++)
+                              <div class="flex items-center justify-center gap-2 mb-2">
+                                {{-- Left side seats (A,B,C) --}}
+                                <div class="flex gap-1">
+                                  @foreach(['A','B','C'] as $col)
+                                    @php $seat = $row.$col; @endphp
+                                    <button type="button" class="seat-btn bg-zinc-800 w-8 h-8 rounded text-xs hover:bg-zinc-700 hover:scale-105 transform transition duration-150 ease-in-out flex items-center justify-center" data-seat="{{ $seat }}">{{ $seat }}</button>
+                                  @endforeach
+                                </div>
+                                
+                                {{-- Aisle gap --}}
+                                <div class="w-4"></div>
+                                
+                                {{-- Right side seats (D,E,F) --}}
+                                <div class="flex gap-1">
+                                  @foreach(['D','E','F'] as $col)
+                                    @php $seat = $row.$col; @endphp
+                                    <button type="button" class="seat-btn bg-zinc-800 w-8 h-8 rounded text-xs hover:bg-zinc-700 hover:scale-105 transform transition duration-150 ease-in-out flex items-center justify-center" data-seat="{{ $seat }}">{{ $seat }}</button>
+                                  @endforeach
+                                </div>
+                              </div>
+                            @endfor
+                          </div>
+
+                          <div class="flex items-center justify-center gap-6 mt-6">
+                            <div class="flex items-center gap-2">
+                              <span class="inline-block w-4 h-4 bg-zinc-800 rounded-sm border border-zinc-600"></span>
+                              <span class="text-xs text-zinc-300">Available</span>
                             </div>
-                          @endfor
-
-                          <div class="flex items-center gap-3 mt-4">
-                            <div><span class="inline-block w-3 h-3 bg-zinc-800 rounded-sm border"></span> Available</div>
-                            <div><span class="inline-block w-3 h-3 bg-green-500 rounded-sm"></span> Selected</div>
+                            <div class="flex items-center gap-2">
+                              <span class="inline-block w-4 h-4 bg-green-500 rounded-sm"></span>
+                              <span class="text-xs text-zinc-300">Selected</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                              <span class="inline-block w-4 h-4 bg-zinc-600 rounded-sm"></span>
+                              <span class="text-xs text-zinc-300">Occupied</span>
+                            </div>
                           </div>
 
-                          <div class="mt-4">
-                            <button type="submit" class="inline-flex items-center px-3 py-1 rounded bg-accent text-white">Confirm Seat</button>
-                            <span id="seatChosen" class="ml-3 text-sm text-zinc-300">{{ $first->seat_number ? 'Selected: ' . $first->seat_number : '' }}</span>
+                          <div class="mt-6 text-center">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 rounded bg-accent text-white font-medium">Confirm Seat Selection</button>
+                            <span id="seatChosen" class="ml-4 text-sm text-zinc-300">{{ $first->seat_number ? 'Selected: ' . $first->seat_number : 'No seat selected' }}</span>
                           </div>
                         </div>
                       </div>
@@ -102,59 +154,6 @@
                   </div>
                 </div>
               @endif
-            </div>
-
-            {{-- Available flights (from DB) --}}
-            <div class="mt-6">
-              <flux:heading size="md">Available Flights</flux:heading>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                @forelse($availableFlights as $af)
-                  <div class="p-3 bg-white dark:bg-zinc-800 rounded-md flex items-center justify-between">
-                    <div>
-                      <div class="font-semibold">{{ optional($af->departureAirport)->iata_code ?? $af->departure_airport_id }} to {{ optional($af->arrivalAirport)->iata_code ?? $af->arrival_airport_id }}</div>
-                      <div class="text-xs text-zinc-500">{{ $af->flight_number }} • {{ \Carbon\Carbon::parse($af->scheduled_departure)->format('M d, Y H:i') }}</div>
-                    </div>
-
-                    <div class="text-right">
-                      <div class="font-semibold">₱ {{ number_format($af->base_price ?? 0,2) }}</div>
-                      <form method="POST" action="{{ route('book.flight') }}" class="mt-2">
-                        @csrf
-                        <input type="hidden" name="flight_id" value="{{ $af->id }}">
-                        <button type="submit" class="inline-flex items-center px-3 py-1 rounded bg-accent text-white text-sm">Book</button>
-                      </form>
-                    </div>
-                  </div>
-                @empty
-                  <div class="p-3 bg-white dark:bg-zinc-700 rounded-md">No available flights at the moment.</div>
-                @endforelse
-              </div>
-            </div>
-            </div> <!-- end tab-seat -->
-
-            {{-- Reservations tab content --}}
-            <div id="tab-reservations" class="tab-content mt-6" style="display:none">
-              @foreach($bookings as $b)
-                @php $f = $b->flight; @endphp
-                <div class="mb-3 p-3 bg-white dark:bg-zinc-800 rounded-md reservation-card cursor-pointer transform transition hover:-translate-y-1 hover:shadow-lg">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                      <div class="airline-logo text-sm text-red-600 font-semibold">Philippine Airlines</div>
-                      <div>
-                        <div class="font-semibold">{{ optional($f)->departure_airport_id ?? 'MNL' }} to {{ optional($f)->arrival_airport_id ?? 'NRT' }}</div>
-                        <div class="text-xs text-zinc-500">{{ $f->flight_number ?? 'PR 428' }} • Seat: {{ $b->seat_number ?? '—' }}</div>
-                      </div>
-                    </div>
-
-                    <div class="flex items-center gap-3">
-                      @if($b->status === 'confirmed' || $b->status === 'Confirmed')
-                        <flux:badge color="green">Confirmed</flux:badge>
-                      @else
-                        <flux:badge color="amber">{{ ucfirst($b->status ?? 'Pending') }}</flux:badge>
-                      @endif
-                    </div>
-                  </div>
-                </div>
-              @endforeach
             </div>
           </div>
         </div>

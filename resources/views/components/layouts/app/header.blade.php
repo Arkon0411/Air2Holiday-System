@@ -17,7 +17,7 @@
             </flux:navbar>
 
             <flux:navbar class="-mb-px max-lg:hidden    ">
-                <flux:navbar.item icon="book-open" :href="route('bookings')" :current="request()->routeIs('bookings')" wire:navigate>
+                <flux:navbar.item icon="book-open-text" :href="route('bookings')" :current="request()->routeIs('bookings')" wire:navigate>
                     {{ __('Bookings') }}
                 </flux:navbar.item>
             </flux:navbar>

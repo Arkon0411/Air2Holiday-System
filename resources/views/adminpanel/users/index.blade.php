@@ -1,4 +1,5 @@
-<x-layouts.app.header title="Users & Airlines">
+<x-layouts.app.sidebar title="Users & Airlines">
+    <flux:main>
     <div class="container mx-auto px-4 py-6">
         <div class="flex items-center justify-between mb-4">
             <h1 class="text-xl font-semibold">Users & Airlines</h1>
@@ -33,4 +34,5 @@
             </tbody>
         </table>
     </div>
-</x-layouts.app.header>
+    </flux:main>
+</x-layouts.app.sidebar>
