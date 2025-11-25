@@ -13,7 +13,7 @@ class Airport extends Model
     protected $table = 'airports';
 
     protected $fillable = [
-        'name', 'iata_code', 'location'
+        'name', 'iata_code', 'location', 'image'
     ];
 
     public function arrivals(): HasMany

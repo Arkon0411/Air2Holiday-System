@@ -30,6 +30,14 @@
                 </flux:tooltip>
             </flux:navbar>
 
+            @if(auth()->check() && auth()->user()->isAdmin())
+            <flux:navbar class="-mb-px max-lg:hidden    ">
+                <flux:navbar.item icon="adjustments-horizontal" :href="route('adminpanel.index')" :current="request()->routeIs('adminpanel.*')" wire:navigate>
+                    {{ __('') }}
+                </flux:navbar.item>
+            </flux:navbar>
+            @endif
+
             <!-- Desktop User Menu -->
             @auth
             <flux:dropdown position="top" align="end">

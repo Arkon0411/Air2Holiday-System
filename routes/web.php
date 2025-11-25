@@ -63,12 +63,21 @@ Route::middleware(['auth', \App\Http\Middleware\AdminPanelAccess::class])->prefi
     Route::put('airports/{airport}', [AirportController::class, 'update'])->name('adminpanel.airports.update');
     Route::delete('airports/{airport}', [AirportController::class, 'destroy'])->name('adminpanel.airports.destroy');
 
-    // Users / Airlines CRUD
+    // Users CRUD
     Route::resource('users', AdminUserController::class, ['as' => 'adminpanel']);
+
+    // Airlines CRUD
+    Route::get('airlines', [\App\Http\Controllers\Admin\AirlineController::class, 'index'])->name('adminpanel.airlines.index');
+    Route::post('airlines', [\App\Http\Controllers\Admin\AirlineController::class, 'store'])->name('adminpanel.airlines.store');
+    Route::get('airlines/{airline}/edit', [\App\Http\Controllers\Admin\AirlineController::class, 'edit'])->name('adminpanel.airlines.edit');
+    Route::put('airlines/{airline}', [\App\Http\Controllers\Admin\AirlineController::class, 'update'])->name('adminpanel.airlines.update');
+    Route::delete('airlines/{airline}', [\App\Http\Controllers\Admin\AirlineController::class, 'destroy'])->name('adminpanel.airlines.destroy');
 
     // Bookings
     Route::get('bookings', [AdminBookingController::class, 'index'])->name('adminpanel.bookings.index');
     Route::get('bookings/{booking}', [AdminBookingController::class, 'show'])->name('adminpanel.bookings.show');
+    Route::get('bookings/{booking}/edit', [AdminBookingController::class, 'edit'])->name('adminpanel.bookings.edit');
+    Route::put('bookings/{booking}', [AdminBookingController::class, 'update'])->name('adminpanel.bookings.update');
     Route::delete('bookings/{booking}', [AdminBookingController::class, 'destroy'])->name('adminpanel.bookings.destroy');
     
     // Flights
@@ -78,4 +87,5 @@ Route::middleware(['auth', \App\Http\Middleware\AdminPanelAccess::class])->prefi
     Route::get('flights/{flight}/edit', [\App\Http\Controllers\Admin\FlightController::class, 'edit'])->name('adminpanel.flights.edit');
     Route::put('flights/{flight}', [\App\Http\Controllers\Admin\FlightController::class, 'update'])->name('adminpanel.flights.update');
     Route::delete('flights/{flight}', [\App\Http\Controllers\Admin\FlightController::class, 'destroy'])->name('adminpanel.flights.destroy');
+
 });

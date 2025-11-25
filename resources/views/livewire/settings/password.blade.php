@@ -26,6 +26,8 @@ new class extends Component {
             throw $e;
         }
 
+         /** @var \App\Models\User $user */
+
         Auth::user()->update([
             'password' => $validated['password'],
         ]);

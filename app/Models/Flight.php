@@ -15,8 +15,13 @@ class Flight extends Model
 
     protected $fillable = [
         'flight_number', 'scheduled_departure', 'scheduled_arrival', 'actual_departure', 'actual_arrival', 'status',
-        'airline_id', 'departure_airport_id', 'arrival_airport_id', 'base_price', 'image'
+        'airline_id', 'departure_airport_id', 'arrival_airport_id', 'base_price', 'business_price', 'image'
     ];
+
+    public function airline(): BelongsTo
+    {
+        return $this->belongsTo(Airline::class, 'airline_id');
+    }
 
     public function arrivalAirport(): BelongsTo
     {

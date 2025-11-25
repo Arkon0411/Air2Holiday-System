@@ -3,39 +3,41 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Airport;
+use App\Models\Airline;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class AirportController extends Controller
+class AirlineController extends Controller
 {
     public function index()
     {
-        $airports = Airport::all();
-        return view('adminpanel.airports.index', compact('airports'));
+        $airlines = Airline::with('user')->get();
+        $airlineUsers = User::where('usertype', 'airline')->get();
+        return view('adminpanel.airlines.index', compact('airlines', 'airlineUsers'));
     }
 
     public function create()
     {
-        return view('adminpanel.airports.create');
+        return view('adminpanel.airlines.create');
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
             'name' => 'required|string',
-            'iata_code' => 'required|string',
-            'location' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'code' => 'required|string|unique:airlines,code',
+            'user_id' => 'nullable|exists:users,id',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
+        // Handle logo upload
+        if ($request->hasFile('logo')) {
+            $image = $request->file('logo');
             
             // Build a safe filename
             $extension = strtolower($image->getClientOriginalExtension() ?: $image->extension() ?: 'png');
-            $filename = uniqid('airport_', true) . '.' . $extension;
+            $filename = uniqid('airline_', true) . '.' . $extension;
             
             $destinationDir = public_path('img');
             
@@ -62,45 +64,41 @@ class AirportController extends Controller
             }
             
             if ($moved) {
-                $data['image'] = 'img/' . $filename;
-            } else {
-                $data['image'] = 'img/loginsplash.jpeg';
+                $data['logo'] = 'img/' . $filename;
             }
-        } else {
-            $data['image'] = 'img/loginsplash.jpeg';
         }
 
-        Airport::create($data);
+        Airline::create($data);
 
-        return redirect()->route('adminpanel.airports.index');
+        return redirect()->route('adminpanel.airlines.index');
     }
 
-    public function edit(Airport $airport)
+    public function edit(Airline $airline)
     {
         return response()->json([
-            'id' => $airport->id,
-            'name' => $airport->name,
-            'iata_code' => $airport->iata_code,
-            'location' => $airport->location,
+            'id' => $airline->id,
+            'name' => $airline->name,
+            'code' => $airline->code,
+            'user_id' => $airline->user_id,
         ]);
     }
 
-    public function update(Request $request, Airport $airport)
+    public function update(Request $request, Airline $airline)
     {
         $data = $request->validate([
             'name' => 'required|string',
-            'iata_code' => 'required|string',
-            'location' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'code' => 'required|string|unique:airlines,code,' . $airline->id,
+            'user_id' => 'nullable|exists:users,id',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
+        // Handle logo upload
+        if ($request->hasFile('logo')) {
+            $image = $request->file('logo');
             
             // Build a safe filename
             $extension = strtolower($image->getClientOriginalExtension() ?: $image->extension() ?: 'png');
-            $filename = uniqid('airport_', true) . '.' . $extension;
+            $filename = uniqid('airline_', true) . '.' . $extension;
             
             $destinationDir = public_path('img');
             
@@ -127,28 +125,29 @@ class AirportController extends Controller
             }
             
             if ($moved) {
-                // Delete old image if it's not the default
-                if ($airport->image && $airport->image !== 'img/loginsplash.jpeg' && file_exists(public_path($airport->image))) {
-                    @unlink(public_path($airport->image));
+                // Delete old logo if it exists
+                if ($airline->logo && file_exists(public_path($airline->logo))) {
+                    @unlink(public_path($airline->logo));
                 }
                 
-                $data['image'] = 'img/' . $filename;
+                $data['logo'] = 'img/' . $filename;
             }
         }
 
-        $airport->update($data);
+        $airline->update($data);
 
-        return redirect()->route('adminpanel.airports.index');
+        return redirect()->route('adminpanel.airlines.index');
     }
 
-    public function destroy(Airport $airport)
+    public function destroy(Airline $airline)
     {
-        // Delete image if it's not the default
-        if ($airport->image && $airport->image !== 'img/loginsplash.jpeg' && file_exists(public_path($airport->image))) {
-            unlink(public_path($airport->image));
+        // Delete logo if it exists
+        if ($airline->logo && file_exists(public_path($airline->logo))) {
+            @unlink(public_path($airline->logo));
         }
 
-        $airport->delete();
-        return redirect()->route('adminpanel.airports.index');
+        $airline->delete();
+
+        return redirect()->route('adminpanel.airlines.index');
     }
 }

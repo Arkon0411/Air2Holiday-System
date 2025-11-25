@@ -32,7 +32,7 @@
                         <span class="flex h-9 w-9 items-center justify-center rounded-md">
                             <x-app-logo-icon class="size-9 fill-current items-center justify-center " />
                         </span>
-                        Air2Holidays
+                            <h1 class="strong">Air2Holiday</h1>
                     </a>
                     <!-- Form Content -->
                     {{ $slot }}

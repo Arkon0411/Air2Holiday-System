@@ -419,3 +419,5 @@ new class extends Component {
         </div>
     </flux:modal>
 </section>
+    </flux:main>
+</x-layouts.app.sidebar>

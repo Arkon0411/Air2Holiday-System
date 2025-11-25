@@ -100,6 +100,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the airline associated with this user
+     */
+    public function airline()
+    {
+        return $this->hasOne(Airline::class, 'user_id');
+    }
+
+    /**
      * Get a fully-qualified URL for the user's profile photo.
      *
      * Handles values that may be stored as a public `img/...` path
