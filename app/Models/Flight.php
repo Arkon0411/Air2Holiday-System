@@ -14,8 +14,17 @@ class Flight extends Model
     protected $table = 'flights';
 
     protected $fillable = [
-        'flight_number', 'scheduled_departure', 'scheduled_arrival', 'actual_departure', 'actual_arrival', 'status',
-        'airline_id', 'departure_airport_id', 'arrival_airport_id', 'base_price', 'image'
+        'flight_number',
+        'scheduled_departure',
+        'scheduled_arrival',
+        'actual_departure',
+        'actual_arrival',
+        'status',
+        'airline_id',
+        'departure_airport_id',
+        'arrival_airport_id',
+        'base_price',
+        'business_class_price',
     ];
 
     public function arrivalAirport(): BelongsTo
@@ -31,5 +40,10 @@ class Flight extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class, 'flight_id');
+    }
+
+    public function airline(): BelongsTo
+    {
+        return $this->belongsTo(Airline::class, 'airline_id');
     }
 }

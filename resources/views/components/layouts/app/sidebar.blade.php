@@ -9,7 +9,7 @@
 
             <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
                  <x-app-logo-icon class="size-9 fill-current items-center justify-center " />
-                 <h1>Air2Holidays</h1>
+                 <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-50">Air2Holiday</h2>
             </a>
 
             <flux:navlist variant="outline">
@@ -17,7 +17,7 @@
                     <flux:navlist.item icon="flag" :href="route('adminpanel.airports.index')" :current="request()->routeIs('adminpanel.airports.index')" wire:navigate>{{ __('Airports') }}</flux:navlist.item>
                     <flux:navlist.item icon="bookmark-square" :href="route('adminpanel.bookings.index')" :current="request()->routeIs('adminpanel.bookings.index')" wire:navigate>{{ __('Bookings') }}</flux:navlist.item>
                     <flux:navlist.item icon="paper-airplane" :href="route('adminpanel.flights.index')" :current="request()->routeIs('adminpanel.flights.index')" wire:navigate>{{ __('Flights') }}</flux:navlist.item>
-                    <flux:navlist.item icon="user-group" :href="route('adminpanel.users.index')" :current="request()->routeIs('adminpanel.users.index')" wire:navigate>{{ __('Users') }}</flux:navlist.item>
+                    <flux:navlist.item icon="user-group" :href="route('adminpanel.users.index')" :current="request()->routeIs('adminpanel.users.index')" wire:navigate>{{ __('Accounts') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 

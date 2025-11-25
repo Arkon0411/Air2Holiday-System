@@ -13,7 +13,13 @@ class Booking extends Model
     protected $table = 'bookings';
 
     protected $fillable = [
-        'booking_date', 'status', 'user_id', 'payment_id', 'flight_id', 'seat_number'
+        'booking_date',
+        'status',
+        'user_id',
+        'payment_id',
+        'flight_id',
+        'seat_number',
+        'class',
     ];
 
     public function flight(): BelongsTo

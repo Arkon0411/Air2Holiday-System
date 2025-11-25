@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -125,5 +127,21 @@ class User extends Authenticatable
 
         // Default: treat as storage path (stored via $file->store('profile-photos','public'))
         return asset('storage/' . ltrim($pp, '/'));
+    }
+
+    /**
+     * Get the airline associated with this user
+     */
+    public function airline(): HasOne
+    {
+        return $this->hasOne(Airline::class, 'user_id');
+    }
+
+    /**
+     * Get all bookings for this user
+     */
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class, 'user_id');
     }
 }

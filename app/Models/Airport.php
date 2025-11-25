@@ -13,7 +13,10 @@ class Airport extends Model
     protected $table = 'airports';
 
     protected $fillable = [
-        'name', 'iata_code', 'location'
+        'name',
+        'iata_code',
+        'location',
+        'image',
     ];
 
     public function arrivals(): HasMany
@@ -24,5 +27,14 @@ class Airport extends Model
     public function departures(): HasMany
     {
         return $this->hasMany(Flight::class, 'departure_airport_id');
+    }
+
+    public function getImageUrlAttribute()
+    {
+        if ($this->image && $this->image !== 'img/loginsplash.jpeg') {
+            return asset('storage/' . $this->image);
+        }
+        
+        return asset($this->image ?? 'img/loginsplash.jpeg');
     }
 }
