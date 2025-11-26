@@ -1,5 +1,29 @@
 <x-layouts.app.sidebar title="Airlines">
     <flux:main x-data="airlineManager()">
+        <!-- Success/Error Messages -->
+        @if(session('success'))
+            <div class="mb-4 rounded-lg bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400" role="alert">
+                <strong>Success!</strong> {{ session('success') }}
+            </div>
+        @endif
+        
+        @if(session('error'))
+            <div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400" role="alert">
+                <strong>Error!</strong> {{ session('error') }}
+            </div>
+        @endif
+        
+        @if($errors->any())
+            <div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400" role="alert">
+                <strong>Validation Errors:</strong>
+                <ul class="mt-2 list-disc list-inside">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        
         <!-- Header -->
         <div class="flex flex-col gap-4 mb-6">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4">

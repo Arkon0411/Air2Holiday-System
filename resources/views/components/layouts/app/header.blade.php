@@ -16,9 +16,15 @@
                 </flux:navbar.item>
             </flux:navbar>
 
+            <flux:navbar class="-mb-px max-lg:hidden">
+                <flux:navbar.item icon="paper-airplane" :href="route('flights')" :current="request()->routeIs('flights')" wire:navigate>
+                    {{ __('Flights') }}
+                </flux:navbar.item>
+            </flux:navbar>
+
             <flux:navbar class="-mb-px max-lg:hidden    ">
                 <flux:navbar.item icon="book-open-text" :href="route('bookings')" :current="request()->routeIs('bookings')" wire:navigate>
-                    {{ __('Bookings') }}
+                    {{ __('My Bookings') }}
                 </flux:navbar.item>
             </flux:navbar>
 
@@ -106,6 +112,12 @@
                 <flux:navlist.group :heading="__('Platform')">
                     <flux:navlist.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                       {{ __('Dashboard') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="paper-airplane" :href="route('flights')" :current="request()->routeIs('flights')" wire:navigate>
+                      {{ __('Flights') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="book-open-text" :href="route('bookings')" :current="request()->routeIs('bookings')" wire:navigate>
+                      {{ __('My Bookings') }}
                     </flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>

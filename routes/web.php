@@ -11,6 +11,9 @@ Route::get('/', function () {
 Route::view('dashboard', 'dashboard')
     ->name('dashboard');
 
+Route::view('flights', 'flights')
+    ->name('flights');
+
 Route::view('bookings', 'bookings')
     ->middleware(['auth', 'verified'])
     ->name('bookings');
@@ -26,6 +29,11 @@ Route::post('book-flight', [BookingController::class, 'store'])
 Route::post('bookings/{booking}/seat', [BookingController::class, 'updateSeat'])
     ->middleware(['auth', 'verified'])
     ->name('booking.seat');
+
+// Request refund for a booking
+Route::post('bookings/{booking}/refund', [BookingController::class, 'requestRefund'])
+    ->middleware(['auth', 'verified'])
+    ->name('booking.refund');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');

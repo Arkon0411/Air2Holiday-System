@@ -70,7 +70,7 @@ class AirlineController extends Controller
 
         Airline::create($data);
 
-        return redirect()->route('adminpanel.airlines.index');
+        return redirect()->route('adminpanel.airlines.index')->with('success', 'Airline created successfully!');
     }
 
     public function edit(Airline $airline)
@@ -136,7 +136,7 @@ class AirlineController extends Controller
 
         $airline->update($data);
 
-        return redirect()->route('adminpanel.airlines.index');
+        return redirect()->route('adminpanel.airlines.index')->with('success', 'Airline updated successfully!');
     }
 
     public function destroy(Airline $airline)

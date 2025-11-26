@@ -15,10 +15,12 @@
             <flux:navlist variant="outline">
                 @if(auth()->user()->isAirline())
                     <flux:navlist.group :heading="__('Airline Panel')" class="grid">
+                        <flux:navlist.item icon="chart-bar" :href="route('adminpanel.index')" :current="request()->routeIs('adminpanel.index')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
                         <flux:navlist.item icon="paper-airplane" :href="route('adminpanel.flights.index')" :current="request()->routeIs('adminpanel.flights.index')" wire:navigate>{{ __('Flights') }}</flux:navlist.item>
                     </flux:navlist.group>
                 @else
                     <flux:navlist.group :heading="__('Admin Panel')" class="grid">
+                        <flux:navlist.item icon="chart-bar" :href="route('adminpanel.index')" :current="request()->routeIs('adminpanel.index')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
                         <flux:navlist.item icon="flag" :href="route('adminpanel.airports.index')" :current="request()->routeIs('adminpanel.airports.index')" wire:navigate>{{ __('Airports') }}</flux:navlist.item>
                         <flux:navlist.item icon="building-office-2" :href="route('adminpanel.airlines.index')" :current="request()->routeIs('adminpanel.airlines.index')" wire:navigate>{{ __('Airlines') }}</flux:navlist.item>
                         <flux:navlist.item icon="bookmark-square" :href="route('adminpanel.bookings.index')" :current="request()->routeIs('adminpanel.bookings.index')" wire:navigate>{{ __('Bookings') }}</flux:navlist.item>
@@ -30,16 +32,6 @@
 
 
             <flux:spacer />
-
-            <flux:navlist variant="outline">
-                <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                {{ __('Repository') }}
-                </flux:navlist.item>
-
-                <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                {{ __('Documentation') }}
-                </flux:navlist.item>
-            </flux:navlist>
 
             <!-- Desktop User Menu -->
             <flux:dropdown class="hidden lg:block" position="bottom" align="start">
@@ -139,5 +131,6 @@
         {{ $slot }}
 
         @fluxScripts
+        @stack('scripts')
     </body>
 </html>

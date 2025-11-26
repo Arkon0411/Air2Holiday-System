@@ -18,6 +18,13 @@ class Flight extends Model
         'airline_id', 'departure_airport_id', 'arrival_airport_id', 'base_price', 'business_price', 'image'
     ];
 
+    protected $casts = [
+        'scheduled_departure' => 'datetime',
+        'scheduled_arrival' => 'datetime',
+        'actual_departure' => 'datetime',
+        'actual_arrival' => 'datetime',
+    ];
+
     public function airline(): BelongsTo
     {
         return $this->belongsTo(Airline::class, 'airline_id');

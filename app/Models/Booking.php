@@ -16,6 +16,10 @@ class Booking extends Model
         'booking_date', 'status', 'user_id', 'payment_id', 'flight_id', 'seat_number', 'class'
     ];
 
+    protected $casts = [
+        'booking_date' => 'datetime',
+    ];
+
     public function flight(): BelongsTo
     {
         return $this->belongsTo(Flight::class, 'flight_id');

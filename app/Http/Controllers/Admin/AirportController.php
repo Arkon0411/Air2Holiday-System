@@ -72,7 +72,7 @@ class AirportController extends Controller
 
         Airport::create($data);
 
-        return redirect()->route('adminpanel.airports.index');
+        return redirect()->route('adminpanel.airports.index')->with('success', 'Airport created successfully!');
     }
 
     public function edit(Airport $airport)
@@ -138,7 +138,7 @@ class AirportController extends Controller
 
         $airport->update($data);
 
-        return redirect()->route('adminpanel.airports.index');
+        return redirect()->route('adminpanel.airports.index')->with('success', 'Airport updated successfully!');
     }
 
     public function destroy(Airport $airport)

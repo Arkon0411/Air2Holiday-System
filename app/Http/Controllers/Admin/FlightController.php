@@ -146,6 +146,11 @@ class FlightController extends Controller
 
         $flight->update($data);
 
+        // Redirect back to dashboard if requested
+        if ($request->input('redirect_to') === 'dashboard') {
+            return redirect()->route('adminpanel.index')->with('success', 'Flight status updated successfully.');
+        }
+
         return redirect()->route('adminpanel.flights.index');
     }
 
