@@ -3,9 +3,9 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:header container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
-            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+    <body class="min-h-screen bg-white dark:bg-zinc-800 pt-16 lg:pt-0">
+        <flux:header container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 fixed top-0 left-0 right-0 z-50 lg:relative flex items-center">
+            <flux:sidebar.toggle class="lg:hidden flex items-center justify-center" icon="bars-2" inset="left" />
 
             <a href="{{ route('dashboard') }}" class="ms-2 me-5 flex items-center space-x-2 rtl:space-x-reverse lg:ms-0" wire:navigate>
             </a>
@@ -22,19 +22,15 @@
                 </flux:navbar.item>
             </flux:navbar>
 
-            <flux:navbar class="-mb-px max-lg:hidden    ">
-                <flux:navbar.item icon="book-open-text" :href="route('bookings')" :current="request()->routeIs('bookings')" wire:navigate>
-                    {{ __('My Bookings') }}
-                </flux:navbar.item>
-            </flux:navbar>
-
             <flux:spacer />
 
-            <flux:navbar class="me-1.5 space-x-0.5 rtl:space-x-reverse">
-                <flux:tooltip :content="__('Search')" position="bottom">
-                    <flux:navbar.item class="!h-10 [&>div>svg]:size-5" icon="magnifying-glass" href="#" :label="__('Search')" />
-                </flux:tooltip>
+            @auth
+            <flux:navbar class="-mb-px max-lg:hidden    ">
+                <flux:navbar.item icon="book-open-text" :href="route('bookings')" :current="request()->routeIs('bookings')" wire:navigate>
+                    {{ __('') }}
+                </flux:navbar.item>
             </flux:navbar>
+            @endauth
 
             @if(auth()->check() && auth()->user()->isAdmin())
             <flux:navbar class="-mb-px max-lg:hidden    ">
@@ -90,9 +86,9 @@
             @endauth
 
             @guest
-                <div class="hidden lg:block">
-                    <flux:button     :href="route('login')" class="me-3">{{ __('Log In') }}</flux:button-link>
-                    <flux:button variant="primary"     :href="route('register')" class="me-3">{{ __('Register') }}</flux:button-link>
+                <div class="flex gap-2">
+                    <flux:button size="sm" :href="route('login')" wire:navigate>{{ __('Log In') }}</flux:button>
+                    <flux:button size="sm" variant="primary" :href="route('register')" wire:navigate>{{ __('Register') }}</flux:button>
                 </div>
             @endguest
             
@@ -116,9 +112,11 @@
                     <flux:navlist.item icon="paper-airplane" :href="route('flights')" :current="request()->routeIs('flights')" wire:navigate>
                       {{ __('Flights') }}
                     </flux:navlist.item>
+                    @auth
                     <flux:navlist.item icon="book-open-text" :href="route('bookings')" :current="request()->routeIs('bookings')" wire:navigate>
                       {{ __('My Bookings') }}
                     </flux:navlist.item>
+                    @endauth
                 </flux:navlist.group>
             </flux:navlist>
 
@@ -128,5 +126,6 @@
         {{ $slot }}
 
         @fluxScripts
+        <script src="{{ asset('js/date-picker.js') }}"></script>
     </body>
 </html>

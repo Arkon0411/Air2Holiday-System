@@ -1,5 +1,5 @@
 <x-layouts.app.header>
-        <div class="container mx-auto px-4 py-6">
+        <div class="container mx-auto px-4 py-6" style="opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out;">
           <h1 class="text-3xl font-bold mb-6 text-zinc-900 dark:text-white">My Bookings</h1>
 
           @php
@@ -22,7 +22,7 @@
               </svg>
               <h3 class="mt-4 text-lg font-medium text-zinc-900 dark:text-white">No bookings yet</h3>
               <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Book your first flight to see it here.</p>
-              <a href="{{ route('flights') }}" class="mt-6 inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
+              <a href="{{ route('flights') }}" class="mt-6 inline-flex items-center px-6 py-3 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition font-semibold">
                 Browse Flights
               </a>
             </div>
@@ -100,7 +100,7 @@
                     {{-- Actions --}}
                     <div class="flex gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-600">
                       @if($booking->status === 'confirmed' && !$booking->seat_number)
-                        <button onclick="openSeatSelection({{ $booking->id }}, '{{ $flight->flight_number }}')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+                        <button onclick="openSeatSelection({{ $booking->id }}, {{ $flight->id }}, '{{ $flight->flight_number }}')" class="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition text-sm font-medium">
                           Select Seat
                         </button>
                       @endif
@@ -134,10 +134,33 @@
         </div>
 
         <script>
-          let currentBookingId = null;
+          // Use window object to avoid redeclaration errors with Livewire navigation
+          window.bookingManagement = window.bookingManagement || {
+            currentBookingId: null,
+            currentFlightId: null,
+            bookedSeatsModal: [],
+            selectedSeat: null
+          };
 
-          function openSeatSelection(bookingId, flightNumber) {
-            currentBookingId = bookingId;
+          function openSeatSelection(bookingId, flightId, flightNumber) {
+            window.bookingManagement.currentBookingId = bookingId;
+            window.bookingManagement.currentFlightId = flightId;
+
+            // Fetch booked seats for this flight
+            fetch(`/api/flights/${window.bookingManagement.currentFlightId}/booked-seats`)
+              .then(response => response.json())
+              .then(data => {
+                window.bookingManagement.bookedSeatsModal = data.booked_seats || [];
+                renderSeatModal(flightNumber);
+              })
+              .catch(error => {
+                console.error('Error fetching booked seats:', error);
+                bookedSeatsModal = [];
+                renderSeatModal(flightNumber);
+              });
+          }
+
+          function renderSeatModal(flightNumber) {
             const modal = document.getElementById('seatModal');
             const modalContent = document.getElementById('seatModalContent');
             
@@ -153,7 +176,7 @@
                 </div>
 
                 <div class="bg-zinc-900 text-white rounded-lg p-6 mb-6">
-                  <div class="mb-4 p-3 bg-blue-700 text-white rounded-md text-center">
+                  <div class="mb-4 p-3 bg-cyan-700 text-white rounded-md text-center">
                     <div class="text-sm">Flight ${flightNumber}</div>
                   </div>
 
@@ -177,6 +200,10 @@
                         <span class="inline-block w-6 h-6 bg-green-500 rounded"></span>
                         <span>Selected</span>
                       </div>
+                      <div class="flex items-center gap-2">
+                        <span class="inline-block w-6 h-6 bg-red-500 rounded"></span>
+                        <span>Occupied</span>
+                      </div>
                     </div>
 
                     <div class="mt-4 text-center text-sm">
@@ -187,7 +214,7 @@
 
                 <div class="flex justify-end gap-3">
                   <button onclick="closeSeatModal()" class="px-4 py-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white">Cancel</button>
-                  <button onclick="confirmSeatSelection()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Confirm Seat</button>
+                  <button onclick="confirmSeatSelection()" class="px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition">Confirm Seat</button>
                 </div>
               </div>
             `;
@@ -197,14 +224,16 @@
             setTimeout(() => {
               document.querySelectorAll('.seat-btn-modal').forEach(btn => {
                 btn.addEventListener('click', function() {
-                  document.querySelectorAll('.seat-btn-modal').forEach(b => {
+                  if (this.disabled) return;
+                  
+                  document.querySelectorAll('.seat-btn-modal:not([disabled])').forEach(b => {
                     b.classList.remove('bg-green-500');
                     b.classList.add('bg-zinc-800');
                   });
                   this.classList.remove('bg-zinc-800');
                   this.classList.add('bg-green-500');
-                  selectedSeat = this.dataset.seat;
-                  document.getElementById('selectedSeatDisplayModal').textContent = 'Selected: ' + selectedSeat;
+                  window.bookingManagement.selectedSeat = this.dataset.seat;
+                  document.getElementById('selectedSeatDisplayModal').textContent = 'Selected: ' + window.bookingManagement.selectedSeat;
                 });
               });
             }, 100);
@@ -217,12 +246,18 @@
               html += '<div class="flex gap-1">';
               for (let col of ['A', 'B', 'C']) {
                 const seat = row + col;
-                html += `<button type="button" class="seat-btn-modal bg-zinc-800 w-8 h-8 rounded text-xs hover:bg-zinc-700 hover:scale-105 transform transition" data-seat="${seat}">${seat}</button>`;
+                const isBooked = window.bookingManagement.bookedSeatsModal.includes(seat);
+                const disabledAttr = isBooked ? 'disabled' : '';
+                const bgClass = isBooked ? 'bg-red-500 cursor-not-allowed' : 'bg-zinc-800 hover:bg-zinc-700 hover:scale-105';
+                html += `<button type="button" class="seat-btn-modal ${bgClass} w-8 h-8 rounded text-xs transform transition" data-seat="${seat}" ${disabledAttr}>${seat}</button>`;
               }
               html += '</div><div class="w-4"></div><div class="flex gap-1">';
               for (let col of ['D', 'E', 'F']) {
                 const seat = row + col;
-                html += `<button type="button" class="seat-btn-modal bg-zinc-800 w-8 h-8 rounded text-xs hover:bg-zinc-700 hover:scale-105 transform transition" data-seat="${seat}">${seat}</button>`;
+                const isBooked = window.bookingManagement.bookedSeatsModal.includes(seat);
+                const disabledAttr = isBooked ? 'disabled' : '';
+                const bgClass = isBooked ? 'bg-red-500 cursor-not-allowed' : 'bg-zinc-800 hover:bg-zinc-700 hover:scale-105';
+                html += `<button type="button" class="seat-btn-modal ${bgClass} w-8 h-8 rounded text-xs transform transition" data-seat="${seat}" ${disabledAttr}>${seat}</button>`;
               }
               html += '</div></div>';
             }
@@ -237,23 +272,23 @@
           let selectedSeat = null;
 
           function confirmSeatSelection() {
-            if (!selectedSeat) {
+            if (!window.bookingManagement.selectedSeat) {
               alert('Please select a seat first!');
               return;
             }
 
             const confirmBtn = event.target;
             confirmBtn.disabled = true;
-            confirmBtn.textContent = 'Processing...';
+            confirmBtn.textContent = 'Saving...';
 
-            fetch(`{{ url('bookings') }}/${currentBookingId}/seat`, {
+            fetch(`{{ url('bookings') }}/${window.bookingManagement.currentBookingId}/seat`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
               },
               body: JSON.stringify({
-                seat_number: selectedSeat
+                seat_number: window.bookingManagement.selectedSeat
               })
             })
             .then(response => response.json())
@@ -307,5 +342,22 @@
               closeSeatModal();
             }
           });
+
+          // Page load animation
+          (function() {
+            const animateContent = function() {
+              const container = document.querySelector('.container.mx-auto');
+              if (container) {
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+              }
+            };
+            
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', animateContent);
+            } else {
+              setTimeout(animateContent, 50);
+            }
+          })();
         </script>
       </x-layouts.app.header>

@@ -104,7 +104,6 @@
                 <form action="{{ route('adminpanel.flights.store') }}" method="POST" class="space-y-4">
                     @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <flux:input label="Flight Number" name="flight_number" required />
                         
                         @if(auth()->user() && auth()->user()->usertype !== 'airline')
                         <div>
@@ -189,7 +188,6 @@
                     </div>
                     
                     <div class="flex flex-col sm:flex-row gap-3 justify-end pt-4">
-                        <flux:button variant="ghost" @click="$dispatch('close-modal', { name: 'createFlightModal' })" type="button" class="w-full sm:w-auto order-2 sm:order-1">Cancel</flux:button>
                         <flux:button type="submit" variant="primary" class="w-full sm:w-auto order-1 sm:order-2">Create Flight</flux:button>
                     </div>
                 </form>
@@ -208,7 +206,6 @@
                         @csrf
                         @method('PUT')
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <flux:input label="Flight Number" name="flight_number" x-model="editingFlight.flight_number" required />
                             
                             @if(auth()->user() && auth()->user()->usertype !== 'airline')
                             <div>
@@ -266,7 +263,6 @@
                         </div>
                         
                         <div class="flex flex-col sm:flex-row gap-3 justify-end pt-4">
-                            <flux:button variant="ghost" @click="$dispatch('close-modal', { name: 'editFlightModal' })" type="button" class="w-full sm:w-auto order-2 sm:order-1">Cancel</flux:button>
                             <flux:button type="submit" variant="primary" class="w-full sm:w-auto order-1 sm:order-2">Update Flight</flux:button>
                         </div>
                     </form>

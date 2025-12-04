@@ -138,7 +138,6 @@
                     </div>
                     
                     <div class="flex flex-col sm:flex-row gap-3 justify-end pt-4">
-                        <flux:button variant="ghost" @click="$dispatch('close-modal', { name: 'createAirlineModal' })" type="button" class="w-full sm:w-auto order-2 sm:order-1">Cancel</flux:button>
                         <flux:button type="submit" variant="primary" class="w-full sm:w-auto order-1 sm:order-2">Create Airline</flux:button>
                     </div>
                 </form>
@@ -176,7 +175,6 @@
                         </div>
                         
                         <div class="flex flex-col sm:flex-row gap-3 justify-end pt-4">
-                            <flux:button variant="ghost" @click="$dispatch('close-modal', { name: 'editAirlineModal' })" type="button" class="w-full sm:w-auto order-2 sm:order-1">Cancel</flux:button>
                             <flux:button type="submit" variant="primary" class="w-full sm:w-auto order-1 sm:order-2">Update Airline</flux:button>
                         </div>
                     </form>

@@ -508,9 +508,6 @@
                     </flux:field>
 
                     <div class="flex gap-2 justify-end">
-                        <flux:modal.close>
-                            <flux:button variant="ghost">Cancel</flux:button>
-                        </flux:modal.close>
                         <flux:button type="submit" variant="primary">Update Status</flux:button>
                     </div>
                 </form>

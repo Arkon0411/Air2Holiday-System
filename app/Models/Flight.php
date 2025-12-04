@@ -25,6 +25,8 @@ class Flight extends Model
         'actual_arrival' => 'datetime',
     ];
 
+    protected $appends = ['formatted_flight_number'];
+
     public function airline(): BelongsTo
     {
         return $this->belongsTo(Airline::class, 'airline_id');
@@ -43,5 +45,35 @@ class Flight extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class, 'flight_id');
+    }
+
+    /**
+     * Get the formatted flight number (Airline IATA Code + Flight ID)
+     */
+    public function getFlightNumberAttribute($value)
+    {
+        // Try to use airline code if relationship is loaded
+        if ($this->relationLoaded('airline') && $this->airline && $this->airline->code) {
+            return strtoupper($this->airline->code) . $this->id;
+        }
+        
+        // Otherwise try to load it
+        if (!$this->relationLoaded('airline') && $this->airline_id) {
+            $airline = $this->airline;
+            if ($airline && $airline->code) {
+                return strtoupper($airline->code) . $this->id;
+            }
+        }
+        
+        // Fallback
+        return $value ?? 'FL' . $this->id;
+    }
+
+    /**
+     * Get the formatted flight number attribute
+     */
+    public function getFormattedFlightNumberAttribute()
+    {
+        return $this->flight_number;
     }
 }

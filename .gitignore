@@ -21,3 +21,11 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+DOCUMENTATION_7_SQL_Scripts.txt
+DOCUMENTATION_6_Implementation_Details.txt
+DOCUMENTATION_5_Navigation_Flow.txt
+DOCUMENTATION_4_Interface_Design.txt
+DOCUMENTATION_3_System_Architecture.txt
+DOCUMENTATION_2_Database_Design.txt
+DOCUMENTATION_1_Requirements_Analysis.txt
+air2holiday(2).sql

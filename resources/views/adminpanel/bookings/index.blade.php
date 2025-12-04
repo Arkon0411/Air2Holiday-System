@@ -162,7 +162,6 @@
                             </div>
                             
                             <div class="flex flex-col sm:flex-row gap-3 justify-end pt-4">
-                                <flux:button variant="ghost" @click="$dispatch('close-modal', { name: 'viewBookingModal' })" type="button" class="w-full sm:w-auto order-2 sm:order-1">Close</flux:button>
                                 <flux:button type="submit" variant="primary" class="w-full sm:w-auto order-1 sm:order-2">Update Status</flux:button>
                             </div>
                         </form>

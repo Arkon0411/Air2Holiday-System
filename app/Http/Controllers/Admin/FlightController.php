@@ -47,7 +47,7 @@ class FlightController extends Controller
         $user = Auth::user();
 
         $data = $request->validate([
-            'flight_number' => 'required|string',
+            'flight_number' => 'nullable|string',
             'scheduled_departure' => 'nullable|string',
             'scheduled_arrival' => 'nullable|string',
             'status' => 'nullable|string',

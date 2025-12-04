@@ -5,7 +5,7 @@ use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('dashboard');
 })->name('home');
 
 Route::view('dashboard', 'dashboard')
@@ -34,6 +34,10 @@ Route::post('bookings/{booking}/seat', [BookingController::class, 'updateSeat'])
 Route::post('bookings/{booking}/refund', [BookingController::class, 'requestRefund'])
     ->middleware(['auth', 'verified'])
     ->name('booking.refund');
+
+// API endpoint to get booked seats for a flight
+Route::get('api/flights/{flight}/booked-seats', [BookingController::class, 'getBookedSeats'])
+    ->name('flight.booked-seats');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');

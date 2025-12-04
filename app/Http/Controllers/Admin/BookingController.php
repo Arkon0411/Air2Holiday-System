@@ -10,7 +10,7 @@ class BookingController extends Controller
 {
     public function index()
     {
-        $bookings = Booking::with(['flight','user'])->get();
+        $bookings = Booking::with(['flight.airline','user'])->get();
         return view('adminpanel.bookings.index', compact('bookings'));
     }
 
